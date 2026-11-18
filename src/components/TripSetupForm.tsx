@@ -10,7 +10,7 @@ interface TripSetupFormProps {
 }
 
 const INPUT_CLASS =
-  'mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200';
+  'mt-1 w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/70 focus:border-[var(--brand-primary)]';
 
 export function TripSetupForm({
   draft,
@@ -26,10 +26,12 @@ export function TripSetupForm({
     <form
       onSubmit={handleSubmit}
       noValidate
-      className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+      className="rounded-xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-5 shadow-xs"
     >
-      <h2 className="text-lg font-semibold text-slate-900">1. Trip Setup</h2>
-      <p className="mt-1 text-sm text-slate-500">
+      <h2 className="font-display text-lg font-bold text-[var(--text-primary)]">
+        1. Trip Setup
+      </h2>
+      <p className="mt-1 text-xs text-[var(--text-secondary)]">
         Enter candidate destinations, travel dates, and group size.
       </p>
 
@@ -110,7 +112,7 @@ export function TripSetupForm({
                   onChangeDraft({ currency: parsed.data });
                 }
               }}
-              className={`${INPUT_CLASS} bg-white`}
+              className={INPUT_CLASS}
             >
               <option value="GBP">GBP (£)</option>
               <option value="USD">USD ($)</option>

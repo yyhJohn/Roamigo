@@ -1,8 +1,10 @@
-node_modules/
-dist/
-dist-server/
+node_modules
+dist
+dist-server
+test-results
+playwright-report
+coverage
 .env
-.env.local
+.env.*
+!.env.example
 *.log
-playwright-report/
-test-results/

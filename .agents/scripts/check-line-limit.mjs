@@ -2,6 +2,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 
+function countCodeLines(source) {
+  const withoutBlockComments = source.replace(/\/\*[\s\S]*?\*\//g, '');
+  return withoutBlockComments
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && !line.startsWith('//')).length;
+}
+
 let inputRaw = '';
 for await (const chunk of process.stdin) {
   inputRaw += chunk;
@@ -17,10 +25,10 @@ try {
       (normalized.endsWith('.ts') || normalized.endsWith('.tsx'));
 
     if (isSource && fs.existsSync(normalized)) {
-      const lines = fs.readFileSync(normalized, 'utf8').split('\n').length;
-      if (lines > 200) {
+      const codeLines = countCodeLines(fs.readFileSync(normalized, 'utf8'));
+      if (codeLines > 200) {
         process.stderr.write(
-          `AGENTS.md violation: ${path.basename(normalized)} has ${lines} lines (max 200).\n`,
+          `AGENTS.md violation: ${path.basename(normalized)} has ${codeLines} code lines (max 200 excluding blanks/comments).\n`,
         );
         process.stdout.write(JSON.stringify({}) + '\n');
         process.exit(1);

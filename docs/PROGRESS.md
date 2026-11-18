@@ -37,3 +37,22 @@
   - Live AI credentials (`.env` `GEMINI_API_KEY` / `OPENAI_API_KEY`) are not provisioned in the local sandbox (`aiConfigured: false`); mocked contract/E2E suites run deterministically while opt-in live AI checks remain clearly separated.
 - **Git Baseline & Branch:** Tag `v0.1.0-hackathon` on `b506a9a`; Milestone 0 committed and pushed on branch `develop` (leaving `main` untouched).
 - **Next Milestone:** **Milestone 1 — Design System and Frontend Foundation** (awaiting human approval of architecture, roadmap, and visual direction).
+
+---
+
+## Milestone 1 — Design System and Frontend Foundation
+
+- **Objective:** Establish semantic Light/Dark Roamigo design tokens (`#103D3B`, `#A7F3CF`, `#F7F9F6`, `#FFFFFF`, `#17302D`), two-font typography (`Manrope` + `Plus Jakarta Sans`), preserved `R` monogram SVG, accessible Radix/`shadcn`-pattern primitives, responsive `AppShell` + `TopMarketingNav`, and re-themed AC1–AC5 instant planner while aligning `AGENTS.md`, `.gitignore`, and `.agents/scripts/check-line-limit.mjs`.
+- **Completed Functionality:**
+  - Updated `AGENTS.md` for the approved production modular monolith, added `test-results/`, `playwright-report/`, and `coverage/` to `.gitignore`, and updated `.agents/scripts/check-line-limit.mjs` to count non-blank, non-comment code lines matching ESLint `max-lines`.
+  - Implemented `src/index.css` semantic Light/Dark tokens (`prefers-reduced-motion` and `@media print` included), `src/lib/theme.ts`, `src/lib/cn.ts`, `src/lib/destinations.ts`, `src/components/ui/*` (`RoamigoLogo`, `Button`, `Card`, `Badge`, `Skeleton`, `EmptyState`, `ModalDialog`, `ToastProvider`), `src/components/layout/*` (`ThemeToggle`, `TopMarketingNav`, `AppShell`), `src/components/landing/LandingHero.tsx`, `src/pages/HomePage.tsx`, and `src/pages/WorkspaceShellPage.tsx`.
+  - Re-themed all existing planner components without breaking any `id`, `aria-label`, or `data-testid` selectors.
+- **Tests Executed & Actual Results:**
+  - `npm run lint` — **PASS**
+  - `npm run typecheck` — **PASS**
+  - `npm run test` — **PASS** (`6` test files, `27` tests)
+  - `npm run build` — **PASS**
+  - `npm run test:e2e` — **PASS** (`4` Playwright Chrome AC1–AC5 & resilience specs)
+- **Screenshots & Browser Evidence:**
+  - Verified desktop Light (`m1-home-desktop.png`), desktop Dark (`m1-shell-desktop-dark.png`), and mobile `390×844` (`m1-shell-mobile-390.png`, horizontal overflow `false`) in Google Chrome.
+- **Next Milestone:** **Milestone 2 — Database and Backend Foundation**

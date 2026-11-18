@@ -1,27 +1,26 @@
-# Project: TripConsensus
-An AI-powered group travel planning web app. Follow the product brief and its acceptance criteria.
+# Project: Roamigo (Production Collaborative Travel Platform)
+Tagline: *Less Arguing, More Wandering.*
 
-## Stack
-- React, TypeScript, Vite and Tailwind CSS for the frontend.
-- Node.js and Express for the backend; Gemini API for itinerary generation.
-- LocalStorage for trip persistence. No database or authentication.
+## Stack & Architecture (Approved Production Modular Monolith)
+- **Frontend:** React 18, TypeScript (strict mode), Vite, Tailwind CSS v4, React Router, TanStack Query, Zustand, React Hook Form + Zod, accessible Radix/`shadcn/ui` primitives, Lucide React, Motion (reduced-motion safe), Recharts, and MapLibre GL JS.
+- **Backend:** Node.js 22 and Express layered modular monolith (`routes -> controllers -> services -> repositories -> domain`), PostgreSQL 16 with Prisma ORM, Socket.IO authenticated room sync, and multi-provider AI abstraction (`gemini-api`, `vertex-ai`, `openai`, `openai-compatible`).
+- **Historical Baseline Compatibility (`v0.1.0-hackathon`):** Original AC1–AC5 instant planner workflows and `'roamigo:v1:trip'` `localStorage` state remain supported with a validated PostgreSQL import path (`POST /api/trips/import-local`).
 
 ## Engineering Rules
-- Keep UI components in `src/components/`, business logic in `src/lib/`, API routes in `server/routes/`, and tests in `tests/`.
-- Enable TypeScript strict mode. Do not use `any` or suppress type errors.
-- Keep source files under 200 lines (excluding blank lines and comments); split larger modules by responsibility, and enforce this limit automatically via ESLint `max-lines`.
-- Validate traveller inputs and AI responses with Zod; display inline errors without losing user input.
-- Never swallow `localStorage` or JSON parse errors silently; log or surface recovery warnings, and verify entry assets load with HTTP 200 and zero `404`/`500` console errors in headless Chrome.
-- Keep API credentials server-side in environment variables. Never expose secrets to the browser or commit them.
-- Require structured JSON from Gemini; validate it before rendering.
-- Calculate costs, budget warnings and vote totals using deterministic TypeScript functions, not AI.
-- Display all prices as estimates, with a consistent currency.
-- Add loading, success and error states for every AI request.
-- Test budget calculations, voting, input validation and malformed AI responses.
-- Do not add features outside the brief or dependencies without written justification.
+- Keep UI components modular under `src/components/`, client/domain logic under `src/lib/`, backend modules/routes under `server/`, database schema/migrations under `prisma/`, and tests under `tests/`.
+- Enable TypeScript strict mode everywhere. Never use `any` or suppress type errors (`@ts-ignore`, `@ts-expect-error`).
+- Keep every source file in `src/` and `server/` under **200 lines** (excluding blank lines and comments); split larger modules by responsibility, enforced via ESLint `max-lines` and `.agents/hooks.json`.
+- Validate all user inputs, URL params, LocalStorage imports, and upstream AI responses with Zod; display inline errors without losing user input.
+- Never swallow `localStorage`, JSON parse, database, or network errors silently; log sanitised server diagnostics and surface actionable user recovery states.
+- Keep all AI, session, OAuth, and database secrets server-side in environment variables. Never store auth tokens in `localStorage`, expose secrets to the browser, or commit `.env` files.
+- Enforce authentication, CSRF protection on state-mutating cookie requests, and per-trip RBAC (`OWNER`, `EDITOR`, `MEMBER`, `VIEWER`) on the server to prevent IDOR.
+- Store and compute all monetary values, budgets, expense splits, and settlements in **integer minor units** (`pence`/`cents`) using deterministic TypeScript functions—never floating-point settlement math or AI arithmetic. Keep estimated (`est.`) activity costs separate from actual expenses.
+- Require user confirmation via Before/After previews before AI assistant proposals modify saved itineraries or votes.
+- Never fabricate customer statistics, reviews, geographical coordinates, test results, screenshots, or commit hashes.
+- Justify every newly added dependency in `docs/` and its corresponding Git commit.
 
 ## Definition of Done
-- `npm run lint` and `npm run typecheck` pass without errors.
-- `npm run test` and `npm run build` exit successfully.
-- `npm run dev -- --host 0.0.0.0 --port 8080` serves the working app.
-- Verify every acceptance criterion in the browser before declaring completion; configure all required npm scripts and report any failed checks.
+- `npm run lint` and `npm run typecheck` pass with zero errors.
+- `npm run test`, `npm run build`, and `npm run test:e2e` exit successfully (preserving original AC1–AC5 alongside expanded unit, DB integration, and multi-context browser suites).
+- `npm run dev -- --host 0.0.0.0 --port 8080` serves the working application with HTTP 200 entry assets and zero unexpected `404`/`500` console errors in Chrome.
+- Every completed milestone updates `docs/PROGRESS.md`, creates a clean Conventional Commit, and pushes verified code to GitHub (`origin/main`).

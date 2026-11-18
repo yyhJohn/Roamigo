@@ -19,7 +19,7 @@ export function FormField({
     <div>
       <label
         htmlFor={id}
-        className="block text-sm font-medium text-slate-700"
+        className="block text-sm font-medium text-[var(--text-primary)]"
       >
         {label}
       </label>
@@ -28,7 +28,7 @@ export function FormField({
         <p
           role="alert"
           data-testid={errorTestId}
-          className="mt-1 text-xs text-rose-600"
+          className="mt-1 text-xs font-medium text-[var(--status-error)]"
         >
           {error}
         </p>

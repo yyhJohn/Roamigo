@@ -5,6 +5,8 @@ import {
 } from '../lib/budget';
 import type { Currency, Traveller } from '../lib/schemas';
 import { parseBudgetInput } from '../lib/validation';
+import { Badge } from './ui/Badge';
+import { Button } from './ui/Button';
 
 interface TravellerListProps {
   travellers: Traveller[];
@@ -49,16 +51,16 @@ export function TravellerList({
   return (
     <section
       aria-label="Traveller list"
-      className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+      className="rounded-xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-5 shadow-xs"
     >
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-slate-900">
+        <h2 className="font-display text-lg font-bold text-[var(--text-primary)]">
           Group Travellers ({travellers.length})
         </h2>
       </div>
 
       {travellers.length === 0 ? (
-        <p className="mt-3 text-sm text-slate-500">
+        <p className="mt-3 text-xs text-[var(--text-secondary)]">
           No travellers added yet. Add friends above to balance budgets and
           interests.
         </p>
@@ -73,47 +75,44 @@ export function TravellerList({
               <li
                 key={traveller.id}
                 data-testid={`traveller-card-${traveller.name}`}
-                className={`rounded-lg border p-3.5 ${
+                className={`rounded-xl border p-3.5 ${
                   isExceeded
-                    ? 'border-rose-300 bg-rose-50/60'
-                    : 'border-slate-200 bg-slate-50/70'
+                    ? 'border-[var(--status-error)]/40 bg-[var(--status-error-bg)]/40'
+                    : 'border-[var(--border-default)] bg-[var(--bg-canvas)]'
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-semibold text-slate-900 break-words">
+                      <span className="font-semibold text-[var(--text-primary)] break-words">
                         {traveller.name}
                       </span>
-                      <span className="rounded-full bg-white px-2.5 py-0.5 text-xs font-medium text-slate-700 ring-1 ring-slate-200">
+                      <Badge variant="outline" className="tabular-nums">
                         Budget:{' '}
                         {formatCurrencyEstimate(traveller.budget, currency)}
-                      </span>
+                      </Badge>
                       {hasItinerary && status && (
-                        <span
+                        <Badge
                           data-testid={`traveller-budget-status-${traveller.name}`}
-                          className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                            isExceeded
-                              ? 'bg-rose-100 text-rose-800'
-                              : 'bg-emerald-100 text-emerald-800'
-                          }`}
+                          variant={isExceeded ? 'danger' : 'success'}
+                          className="tabular-nums"
                         >
                           {isExceeded
                             ? `Over budget by ${formatCurrencyEstimate(status.overageAmount, currency)} est.`
                             : 'Within budget'}
-                        </span>
+                        </Badge>
                       )}
                     </div>
 
-                    <p className="mt-1.5 text-xs text-slate-600">
-                      <span className="font-medium text-slate-700">
+                    <p className="mt-1.5 text-xs text-[var(--text-secondary)]">
+                      <span className="font-semibold text-[var(--text-primary)]">
                         Interests:
                       </span>{' '}
                       {traveller.interests.join(', ')}
                     </p>
                     {traveller.preferences && (
-                      <p className="mt-0.5 text-xs text-slate-600">
-                        <span className="font-medium text-slate-700">
+                      <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
+                        <span className="font-semibold text-[var(--text-primary)]">
                           Notes:
                         </span>{' '}
                         {traveller.preferences}
@@ -127,27 +126,31 @@ export function TravellerList({
                           aria-label={`Edit budget for ${traveller.name}`}
                           value={budgetDraft}
                           onChange={(e) => setBudgetDraft(e.target.value)}
-                          className="w-28 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs focus:border-indigo-500 focus:outline-none"
+                          className="w-28 rounded-md border border-[var(--border-default)] bg-[var(--bg-surface)] px-2 py-1 text-xs text-[var(--text-primary)]"
                         />
-                        <button
+                        <Button
                           type="button"
+                          size="sm"
                           onClick={() => saveEdit(traveller.id)}
-                          className="rounded-md bg-indigo-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-indigo-700"
                         >
                           Save
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="button"
+                          variant="secondary"
+                          size="sm"
                           onClick={() => {
                             setEditingId(null);
                             setBudgetError(null);
                           }}
-                          className="rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
                         >
                           Cancel
-                        </button>
+                        </Button>
                         {budgetError && (
-                          <p role="alert" className="w-full text-xs text-rose-600">
+                          <p
+                            role="alert"
+                            className="w-full text-xs text-[var(--status-error)]"
+                          >
                             {budgetError}
                           </p>
                         )}
@@ -157,23 +160,25 @@ export function TravellerList({
 
                   <div className="flex shrink-0 flex-col gap-1.5">
                     {!isEditing && (
-                      <button
+                      <Button
                         type="button"
+                        variant="secondary"
+                        size="sm"
                         onClick={() => startEdit(traveller)}
                         aria-label={`Edit budget for ${traveller.name}`}
-                        className="rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
                       >
                         Edit budget
-                      </button>
+                      </Button>
                     )}
-                    <button
+                    <Button
                       type="button"
+                      variant="danger"
+                      size="sm"
                       onClick={() => onRemoveTraveller(traveller.id)}
                       aria-label={`Remove ${traveller.name}`}
-                      className="rounded-md border border-rose-200 bg-white px-2.5 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50"
                     >
                       Remove
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </li>

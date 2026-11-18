@@ -7,6 +7,7 @@ import {
 } from '../lib/schemas';
 import { extractFieldErrors, parseBudgetInput } from '../lib/validation';
 import { FormField } from './FormField';
+import { Button } from './ui/Button';
 
 interface TravellerFormProps {
   currency: Currency;
@@ -15,7 +16,7 @@ interface TravellerFormProps {
 }
 
 const INPUT_CLASS =
-  'mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200';
+  'mt-1 w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/70 focus:border-[var(--brand-primary)]';
 
 export function TravellerForm({
   currency,
@@ -76,10 +77,12 @@ export function TravellerForm({
       onSubmit={handleSubmit}
       noValidate
       aria-label="Add traveller"
-      className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+      className="rounded-xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-5 shadow-xs"
     >
-      <h2 className="text-lg font-semibold text-slate-900">2. Add Traveller</h2>
-      <p className="mt-1 text-sm text-slate-500">
+      <h2 className="font-display text-lg font-bold text-[var(--text-primary)]">
+        2. Add Traveller
+      </h2>
+      <p className="mt-1 text-xs text-[var(--text-secondary)]">
         Include each friend&apos;s individual budget and interests.
       </p>
 
@@ -152,12 +155,9 @@ export function TravellerForm({
           />
         </FormField>
 
-        <button
-          type="submit"
-          className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-        >
+        <Button type="submit" className="w-full">
           Add Traveller
-        </button>
+        </Button>
       </div>
     </form>
   );

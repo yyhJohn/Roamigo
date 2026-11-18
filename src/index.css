@@ -1,1 +1,92 @@
 @import "tailwindcss";
+
+:root {
+  --font-display: 'Manrope', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  --bg-canvas: #f7f9f6;
+  --bg-surface: #ffffff;
+  --bg-muted: #eef3ee;
+  --bg-elevated: #ffffff;
+
+  --brand-primary: #103d3b;
+  --brand-primary-hover: #16524f;
+  --brand-on-primary: #ffffff;
+  --brand-accent: #a7f3cf;
+  --brand-on-accent: #103d3b;
+
+  --text-primary: #17302d;
+  --text-secondary: #526375;
+  --border-default: #e2e8e4;
+  --border-strong: #cbd5cf;
+
+  --status-success: #15803d;
+  --status-success-bg: #dcfce7;
+  --status-warning: #b45309;
+  --status-warning-bg: #fef3c7;
+  --status-error: #dc2626;
+  --status-error-bg: #fee2e2;
+}
+
+.dark {
+  --bg-canvas: #0b1716;
+  --bg-surface: #112220;
+  --bg-muted: #172e2b;
+  --bg-elevated: #162b28;
+
+  --brand-primary: #a7f3cf;
+  --brand-primary-hover: #86efac;
+  --brand-on-primary: #0b2220;
+  --brand-accent: #1d4d49;
+  --brand-on-accent: #d1fae5;
+
+  --text-primary: #ecf5f2;
+  --text-secondary: #94a3b8;
+  --border-default: #223936;
+  --border-strong: #2f4d49;
+
+  --status-success: #4ade80;
+  --status-success-bg: #143524;
+  --status-warning: #fbbf24;
+  --status-warning-bg: #3b2a0d;
+  --status-error: #f87171;
+  --status-error-bg: #3b1619;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+}
+
+h1, h2, h3, .font-display {
+  font-family: var(--font-display);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+}
