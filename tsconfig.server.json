@@ -13,5 +13,10 @@
     "skipLibCheck": true,
     "resolveJsonModule": true
   },
-  "include": ["server/**/*.ts", "src/lib/schemas.ts"]
+  "include": [
+    "server/**/*.ts",
+    "src/lib/schemas.ts",
+    "src/lib/contracts/**/*.ts",
+    "src/lib/domain/**/*.ts"
+  ]
 }

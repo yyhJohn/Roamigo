@@ -1,16 +1,18 @@
 import { useState, type ReactNode } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   CalendarRange,
   ChevronLeft,
   ChevronRight,
   FolderKanban,
   Home,
-  SlidersHorizontal,
-  Vote,
+  LogOut,
+  PlusCircle,
+  Settings,
   Wallet,
 } from 'lucide-react';
 import { cn } from '../../lib/cn';
+import { useLogoutMutation, useSessionQuery } from '../../lib/useAuth';
 import { RoamigoLogo } from '../ui/RoamigoLogo';
 import { ThemeToggle } from './ThemeToggle';
 
@@ -21,12 +23,14 @@ export interface ShellNavItem {
 }
 
 const DEFAULT_ITEMS: ShellNavItem[] = [
-  { to: '/', label: 'Home & Sandbox', icon: <Home className="h-4 w-4" /> },
+  { to: '/trips', label: 'My Trips', icon: <FolderKanban className="h-4 w-4" /> },
   {
-    to: '/workspace-preview',
-    label: 'Workspace Shell',
-    icon: <FolderKanban className="h-4 w-4" />,
+    to: '/trips/new',
+    label: 'Create Trip',
+    icon: <PlusCircle className="h-4 w-4" />,
   },
+  { to: '/settings', label: 'Settings', icon: <Settings className="h-4 w-4" /> },
+  { to: '/', label: 'Public Landing', icon: <Home className="h-4 w-4" /> },
 ];
 
 interface AppShellProps {
@@ -46,6 +50,15 @@ export function AppShell({
 }: AppShellProps) {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { data: session } = useSessionQuery();
+  const logoutMutation = useLogoutMutation();
+  const user = session?.authenticated ? session.user : null;
+
+  async function handleSignOut() {
+    navigate('/', { replace: true });
+    await logoutMutation.mutateAsync();
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-[var(--bg-canvas)] text-[var(--text-primary)] md:flex-row">
@@ -58,7 +71,7 @@ export function AppShell({
       >
         <div className="space-y-5">
           <div className="flex items-center justify-between gap-2 px-1">
-            <Link to="/">
+            <Link to="/trips">
               <RoamigoLogo compact={collapsed} />
             </Link>
             <button
@@ -97,13 +110,39 @@ export function AppShell({
           </nav>
         </div>
 
-        <div className="flex items-center justify-between border-t border-[var(--border-default)] pt-3">
-          {!collapsed && (
-            <span className="text-xs font-medium text-[var(--text-secondary)]">
-              Appearance
-            </span>
+        <div className="space-y-3 border-t border-[var(--border-default)] pt-3">
+          {user && !collapsed && (
+            <div className="flex items-center justify-between gap-2 rounded-lg bg-[var(--bg-canvas)] px-2.5 py-2">
+              <div className="min-w-0">
+                <p
+                  data-testid="shell-user-name"
+                  className="truncate text-xs font-semibold"
+                >
+                  {user.displayName}
+                </p>
+                <p className="truncate text-[11px] text-[var(--text-secondary)]">
+                  {user.preferredCurrency}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => void handleSignOut()}
+                aria-label="Sign out"
+                data-testid="shell-logout-btn"
+                className="rounded-md p-1.5 text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] hover:text-[var(--text-primary)]"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            </div>
           )}
-          <ThemeToggle />
+          <div className="flex items-center justify-between">
+            {!collapsed && (
+              <span className="text-xs font-medium text-[var(--text-secondary)]">
+                Appearance
+              </span>
+            )}
+            <ThemeToggle />
+          </div>
         </div>
       </aside>
 
@@ -111,7 +150,7 @@ export function AppShell({
         <header className="no-print sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border-default)] bg-[var(--bg-surface)]/95 px-4 py-3.5 backdrop-blur-xs sm:px-6">
           <div className="flex items-center gap-3">
             <div className="md:hidden">
-              <Link to="/">
+              <Link to="/trips">
                 <RoamigoLogo compact />
               </Link>
             </div>
@@ -146,21 +185,21 @@ export function AppShell({
           <Home className="h-4 w-4" />
           <span>Home</span>
         </Link>
-        <Link to="/workspace-preview" className="flex flex-col items-center gap-0.5 py-1 text-[var(--brand-primary)]">
-          <CalendarRange className="h-4 w-4" />
-          <span>Plan</span>
+        <Link to="/trips" className="flex flex-col items-center gap-0.5 py-1 text-[var(--brand-primary)]">
+          <FolderKanban className="h-4 w-4" />
+          <span>Trips</span>
         </Link>
-        <a href="/#instant-sandbox" className="flex flex-col items-center gap-0.5 py-1 text-[var(--text-secondary)]">
-          <Vote className="h-4 w-4" />
-          <span>Vote</span>
-        </a>
-        <a href="/#instant-sandbox" className="flex flex-col items-center gap-0.5 py-1 text-[var(--text-secondary)]">
+        <Link to="/trips/new" className="flex flex-col items-center gap-0.5 py-1 text-[var(--text-secondary)]">
+          <CalendarRange className="h-4 w-4" />
+          <span>Create</span>
+        </Link>
+        <Link to="/trips" className="flex flex-col items-center gap-0.5 py-1 text-[var(--text-secondary)]">
           <Wallet className="h-4 w-4" />
-          <span>Budget</span>
-        </a>
-        <Link to="/workspace-preview" className="flex flex-col items-center gap-0.5 py-1 text-[var(--text-secondary)]">
-          <SlidersHorizontal className="h-4 w-4" />
-          <span>Shell</span>
+          <span>Budgets</span>
+        </Link>
+        <Link to="/settings" className="flex flex-col items-center gap-0.5 py-1 text-[var(--text-secondary)]">
+          <Settings className="h-4 w-4" />
+          <span>Settings</span>
         </Link>
       </nav>
     </div>

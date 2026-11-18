@@ -77,3 +77,25 @@
   - `npm run build` — **PASS**
   - `npm run test:e2e` — **PASS** (`4` Chrome Playwright specs)
 - **Next Milestone:** **Milestone 3 — Authentication and Authorisation**
+
+
+---
+
+## Milestone 3 — Authentication and Authorisation
+
+- **Objective:** Deliver `scrypt` password hashing, `HttpOnly; SameSite=Lax` cookie sessions, timing-safe `X-CSRF-Token` verification on mutating routes, registration/login/logout/email-verification/password-reset flows, accessible UI screens, and server-side RBAC (`OWNER`, `EDITOR`, `MEMBER`, `VIEWER`) preventing IDOR.
+- **Completed Functionality:**
+  - Shared Zod contracts in `src/lib/contracts/auth.schemas.ts`.
+  - Backend session hydrator, CSRF enforcement, and `requireTripRole` RBAC middleware in `server/middleware/auth.ts`.
+  - Auth & password-reset services and Express routes in `server/modules/auth/{auth.service,passwordReset.service,auth.routes}.ts` (`GET /api/auth/me`, `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`, `POST /api/auth/forgot-password`, `POST /api/auth/reset-password`, `POST /api/auth/verify-email`, `GET /api/auth/google/status`).
+  - Made `prisma/seed.ts` concurrency-safe using a PostgreSQL transaction + advisory lock (`pg_advisory_xact_lock`).
+  - Frontend typed API client (`src/lib/apiClient.ts` keeping CSRF token strictly in memory, never in `localStorage`), TanStack Query session hooks & `<ProtectedRoute>` (`src/lib/useAuth.tsx`), and editorial `AuthPage` + subcomponents (`src/pages/AuthPage.tsx`, `src/components/auth/*`).
+- **Tests Executed & Actual Results:**
+  - `npm run lint` — **PASS**
+  - `npm run typecheck` — **PASS**
+  - `npm run test` — **PASS** (`8` test files, `32` tests including `tests/api/auth-rbac.test.ts` verifying CSRF, password reset, and cross-user IDOR isolation)
+  - `npm run build` — **PASS**
+  - `npm run test:e2e` — **PASS** (`5` Playwright Chrome specs including `tests/e2e/auth.spec.ts`)
+- **Screenshots & Browser Evidence:**
+  - Captured desktop login screen (`m3-auth-login.png`) and verified Demo Account sign-in, route protection, `localStorage` secret-hygiene, and sign-out in Chrome.
+- **Next Milestone:** **Milestone 4 — Trip Management, 10-Step Wizard, Invitations & MVP Importer**

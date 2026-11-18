@@ -3,6 +3,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { ToastProvider } from './components/ui/ToastProvider';
 import { applyThemeToDom, useThemeStore } from './lib/theme';
+import { ProtectedRoute } from './lib/useAuth';
+import { AuthPage } from './pages/AuthPage';
 import { HomePage } from './pages/HomePage';
 import { WorkspaceShellPage } from './pages/WorkspaceShellPage';
 
@@ -28,6 +30,24 @@ export function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/auth/login" element={<AuthPage mode="login" />} />
+            <Route path="/auth/register" element={<AuthPage mode="register" />} />
+            <Route
+              path="/auth/forgot-password"
+              element={<AuthPage mode="forgot" />}
+            />
+            <Route
+              path="/auth/reset-password"
+              element={<AuthPage mode="reset" />}
+            />
+            <Route
+              path="/trips"
+              element={
+                <ProtectedRoute>
+                  <WorkspaceShellPage />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/workspace-preview" element={<WorkspaceShellPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
