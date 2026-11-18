@@ -99,3 +99,23 @@
 - **Screenshots & Browser Evidence:**
   - Captured desktop login screen (`m3-auth-login.png`) and verified Demo Account sign-in, route protection, `localStorage` secret-hygiene, and sign-out in Chrome.
 - **Next Milestone:** **Milestone 4 — Trip Management, 10-Step Wizard, Invitations & MVP Importer**
+
+
+---
+
+## Milestone 4 — Trip Management, 10-Step Wizard, Invitations & MVP Importer
+
+- **Objective:** Implement My Trips Dashboard, 10-step Create Trip Wizard with draft save/resume, tokenised Invitations & Member Role Management (including atomic ownership transfer), Demo Trip cloning, and validated `'roamigo:v1:trip'` LocalStorage import into integer minor units.
+- **Completed Functionality:**
+  - Pure integer minor-unit currency module (`src/lib/domain/money.ts`) and shared Zod/DTO contracts (`src/lib/contracts/{trip.schemas,tripDetail.types}.ts`).
+  - Backend modules `server/modules/trips/*` (`trips.query.ts`, `trips.mapper.ts`, `trips.service.ts`, `importLocal.service.ts`, `cloneTrip.service.ts`, `trips.routes.ts`), `server/modules/invitations/*`, and `server/modules/members/members.routes.ts`.
+  - Frontend **My Trips Dashboard** (`src/pages/TripsDashboardPage.tsx`, `TripCard.tsx`, `SandboxImportBanner.tsx`), **10-Step Create Trip Wizard** (`src/pages/CreateTripWizardPage.tsx`, `WizardStepEarly.tsx`, `WizardStepLate.tsx`, `wizardState.ts`), **Invitation Acceptance Page** (`src/pages/InviteAcceptPage.tsx`), **Members & Share Modal** (`TripMembersModal.tsx`), and `TripOverviewPage.tsx`.
+- **Tests Executed & Actual Results:**
+  - `npm run lint` — **PASS**
+  - `npm run typecheck` — **PASS**
+  - `npm run test` — **PASS** (`9` test files, `34` tests including `tests/api/trips-invites.test.ts`)
+  - `npm run build` — **PASS**
+  - `npm run test:e2e` — **PASS** (`6` Playwright Chrome specs including `tests/e2e/trips-wizard.spec.ts`)
+- **Screenshots & Browser Evidence:**
+  - Verified desktop My Trips Dashboard (`m4-my-trips.png`) and 10-Step Create Trip Wizard (`m4-wizard.png`) in Chrome.
+- **Next Milestone:** **Milestone 5 — Multi-Provider AI Engine & Staged Assistant Proposals**

@@ -9,7 +9,10 @@ import {
 } from './middleware/security.js';
 import { createAuthRouter } from './modules/auth/auth.routes.js';
 import { createHealthRouter } from './modules/health/health.routes.js';
+import { createInvitationsRouter } from './modules/invitations/invitations.routes.js';
+import { createMembersRouter } from './modules/members/members.routes.js';
 import { createOpenApiRouter } from './modules/openapi/openapi.routes.js';
+import { createTripsRouter } from './modules/trips/trips.routes.js';
 import { createItineraryRouter } from './routes/itinerary.js';
 import {
   createGeminiGenerator,
@@ -40,6 +43,9 @@ export function createApp(
   app.use('/api/health', createHealthRouter(config, deps?.prisma));
   app.use('/api', createOpenApiRouter());
   app.use('/api/auth', createAuthRouter(config, deps?.prisma));
+  app.use('/api/trips', createTripsRouter(deps?.prisma));
+  app.use('/api', createInvitationsRouter(config, deps?.prisma));
+  app.use('/api', createMembersRouter(deps?.prisma));
   app.use('/api/itinerary', aiLimiter, createItineraryRouter(generator));
 
   app.use('/api/*', (_req, res) => {

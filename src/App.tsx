@@ -5,7 +5,11 @@ import { ToastProvider } from './components/ui/ToastProvider';
 import { applyThemeToDom, useThemeStore } from './lib/theme';
 import { ProtectedRoute } from './lib/useAuth';
 import { AuthPage } from './pages/AuthPage';
+import { CreateTripWizardPage } from './pages/CreateTripWizardPage';
 import { HomePage } from './pages/HomePage';
+import { InviteAcceptPage } from './pages/InviteAcceptPage';
+import { TripOverviewPage } from './pages/TripOverviewPage';
+import { TripsDashboardPage } from './pages/TripsDashboardPage';
 import { WorkspaceShellPage } from './pages/WorkspaceShellPage';
 
 const queryClient = new QueryClient({
@@ -44,7 +48,39 @@ export function App() {
               path="/trips"
               element={
                 <ProtectedRoute>
-                  <WorkspaceShellPage />
+                  <TripsDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/trips/new"
+              element={
+                <ProtectedRoute>
+                  <CreateTripWizardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/trips/:tripId/wizard"
+              element={
+                <ProtectedRoute>
+                  <CreateTripWizardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/trips/:tripId"
+              element={
+                <ProtectedRoute>
+                  <TripOverviewPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/invites/:token"
+              element={
+                <ProtectedRoute>
+                  <InviteAcceptPage />
                 </ProtectedRoute>
               }
             />
