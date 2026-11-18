@@ -1,5 +1,6 @@
 import type { ItinerarySource, PrismaClient } from '@prisma/client';
 import type { AiWorkspaceItinerary } from '../../../src/lib/contracts/ai.schemas.js';
+import { matchCuratedLandmark } from '../maps/landmarks.js';
 
 export async function persistItineraryVersionWithVoteCarryover(
   prisma: PrismaClient,
@@ -85,6 +86,11 @@ export async function persistItineraryVersionWithVoteCarryover(
       });
       for (const [idx, act] of day.activities.entries()) {
         const carriedCoord = prevCoordsByStableKey.get(act.stableKey);
+        const curatedMatch =
+          carriedCoord?.lat != null
+            ? null
+            : (matchCuratedLandmark(act.locationName, [payload.chosenDestination]) ??
+              matchCuratedLandmark(act.title, [payload.chosenDestination]));
         const dbAct = await tx.activity.create({
           data: {
             dayId: dbDay.id,
@@ -98,9 +104,12 @@ export async function persistItineraryVersionWithVoteCarryover(
             endTime: act.endTime ?? null,
             estimatedCostMinor: act.estimatedCostMinor,
             locationName: act.locationName ?? null,
-            lat: carriedCoord?.lat ?? null,
-            lng: carriedCoord?.lng ?? null,
-            coordSource: carriedCoord?.coordSource ?? 'unverified',
+            lat: carriedCoord?.lat ?? curatedMatch?.lat ?? null,
+            lng: carriedCoord?.lng ?? curatedMatch?.lng ?? null,
+            coordSource:
+              carriedCoord?.coordSource ??
+              curatedMatch?.coordSource ??
+              'unverified',
             compromiseExplanation: act.compromiseExplanation,
             matchedTravellers: act.matchedTravellers,
             included: act.included,

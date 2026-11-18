@@ -7,12 +7,14 @@ import {
   applySecurityMiddleware,
   createScopedRateLimiter,
 } from './middleware/security.js';
+import { createActivitiesRouter } from './modules/activities/activities.routes.js';
 import { createTravelAiProvider } from './modules/ai/ai.factory.js';
 import { createWorkspaceAiRouter } from './modules/ai/ai.routes.js';
 import type { TravelAIProvider } from './modules/ai/ai.types.js';
 import { createAuthRouter } from './modules/auth/auth.routes.js';
 import { createHealthRouter } from './modules/health/health.routes.js';
 import { createInvitationsRouter } from './modules/invitations/invitations.routes.js';
+import { createMapsRouter } from './modules/maps/maps.routes.js';
 import { createMembersRouter } from './modules/members/members.routes.js';
 import { createOpenApiRouter } from './modules/openapi/openapi.routes.js';
 import { createTripsRouter } from './modules/trips/trips.routes.js';
@@ -25,6 +27,7 @@ import {
 export interface AppDependencies {
   prisma?: PrismaClient;
   aiProvider?: TravelAIProvider;
+  onTripChanged?: (tripId: string) => void;
 }
 
 export function createApp(
@@ -51,6 +54,8 @@ export function createApp(
   app.use('/api/trips', createTripsRouter(deps?.prisma));
   app.use('/api', createInvitationsRouter(config, deps?.prisma));
   app.use('/api', createMembersRouter(deps?.prisma));
+  app.use('/api', createActivitiesRouter(deps?.prisma, deps?.onTripChanged));
+  app.use('/api', createMapsRouter(config, deps?.prisma));
   app.use('/api', createWorkspaceAiRouter(config, aiProvider, deps?.prisma));
   app.use('/api/itinerary', aiLimiter, createItineraryRouter(generator));
 

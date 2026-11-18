@@ -25,11 +25,11 @@ export function AiAssistantPanel({ detail }: { detail: TripDetailDto }) {
     handleConfirmApply,
   } = useAiAssistant(detail.summary.id);
 
+  const isReadOnlyDemo = detail.summary.isDemo || detail.isDemoReadOnly;
   const canApply =
-    !detail.isDemoReadOnly &&
+    !isReadOnlyDemo &&
     (detail.summary.myRole === 'OWNER' || detail.summary.myRole === 'EDITOR');
-  const canPropose =
-    !detail.isDemoReadOnly && detail.summary.myRole !== 'VIEWER';
+  const canPropose = !isReadOnlyDemo && detail.summary.myRole !== 'VIEWER';
 
   return (
     <Card className="space-y-4 p-4">
@@ -53,7 +53,7 @@ export function AiAssistantPanel({ detail }: { detail: TripDetailDto }) {
         )}
       </div>
 
-      {detail.isDemoReadOnly && (
+      {isReadOnlyDemo && (
         <p className="rounded-lg bg-[var(--bg-subtle)] p-2.5 text-xs text-[var(--text-secondary)]">
           Clone this demo trip to generate new AI versions or propose assistant
           edits.

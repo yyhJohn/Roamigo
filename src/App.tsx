@@ -8,7 +8,7 @@ import { AuthPage } from './pages/AuthPage';
 import { CreateTripWizardPage } from './pages/CreateTripWizardPage';
 import { HomePage } from './pages/HomePage';
 import { InviteAcceptPage } from './pages/InviteAcceptPage';
-import { TripOverviewPage } from './pages/TripOverviewPage';
+import { TripWorkspacePage } from './pages/TripWorkspacePage';
 import { TripsDashboardPage } from './pages/TripsDashboardPage';
 import { WorkspaceShellPage } from './pages/WorkspaceShellPage';
 
@@ -72,7 +72,7 @@ export function App() {
               path="/trips/:tripId"
               element={
                 <ProtectedRoute>
-                  <TripOverviewPage />
+                  <TripWorkspacePage />
                 </ProtectedRoute>
               }
             />

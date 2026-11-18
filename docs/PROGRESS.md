@@ -137,3 +137,24 @@
   - `npm run build` — **PASS**
   - `npm run test:e2e` — **PASS** (`6` Playwright Chrome specs)
 - **Next Milestone:** **Milestone 6 — Flagship 3-Panel Main Trip Workspace & Interactive MapLibre Map**
+
+
+---
+
+## Milestone 6 — Flagship 3-Panel Main Trip Workspace & Interactive MapLibre Map
+
+- **Objective:** Deliver the flagship 3-panel desktop / single-column mobile Trip Workspace (`/trips/:tripId`) combining day-by-day collaborative itinerary editing, manual day & activity CRUD, drag-and-drop plus accessible Move Up/Down reordering, honest landmark coordinate resolution, and an interactive MapLibre GL JS destination map.
+- **Completed Functionality:**
+  - Shared Zod activity & day contracts (`src/lib/contracts/activity.schemas.ts`) and backend manual itinerary modules (`server/modules/activities/{days.service,activities.service,activities.reorder,activities.routes}.ts`) enforcing `OWNER`/`EDITOR` RBAC and protecting the shared Demo Trip from direct mutation.
+  - Honest landmark gazetteer & optional Nominatim search (`server/modules/maps/{landmarks.data,landmarks,maps.routes}.ts`): attaches `coordSource: 'curated'` when matched or `'nominatim'` when configured, and preserves `lat: null, lng: null, coordSource: 'unverified'` when unmatched—never fabricating coordinates.
+  - Modular 3-panel workspace (`src/pages/TripWorkspacePage.tsx` + `src/components/workspace/{WorkspaceLeftRail,WorkspaceTimeline,WorkspaceActivityCard,ActivityFormModal,ActivityFormFields,TripMapPanel,useMapLibreRoute,WorkspaceBudgetQuickCard,WorkspaceMobileNav}.ts(x)`).
+  - Added dependency with justification: `maplibre-gl` (open-source WebGL vector map engine supporting free OpenFreeMap/OpenStreetMap vector tiles with zero mandatory proprietary API keys).
+- **Tests Executed & Actual Results:**
+  - `npm run lint` — **PASS**
+  - `npm run typecheck` — **PASS**
+  - `npm run test` — **PASS** (`11` test files, `37` tests including `tests/api/activities-maps.test.ts`)
+  - `npm run build` — **PASS**
+  - `npm run test:e2e` — **PASS** (`7` Playwright Chrome specs including `tests/e2e/workspace-map.spec.ts`)
+- **Screenshots & Browser Evidence:**
+  - Captured desktop `1440×920` (`m6-workspace-desktop.png`) and mobile `390×844` (`m6-workspace-mobile.png`, verified `mobileOverflow390: false`, `mobileOverflow375: false`, `pageErrors: []`).
+- **Next Milestone:** **Milestone 7 — Server-Authoritative Voting & Real-Time Socket.IO Sync**
