@@ -13,12 +13,14 @@ import { createWorkspaceAiRouter } from './modules/ai/ai.routes.js';
 import type { TravelAIProvider } from './modules/ai/ai.types.js';
 import { createAuthRouter } from './modules/auth/auth.routes.js';
 import { createExpensesRouter } from './modules/expenses/expenses.routes.js';
+import { createExportsRouter } from './modules/exports/exports.routes.js';
 import { createHealthRouter } from './modules/health/health.routes.js';
 import { createInvitationsRouter } from './modules/invitations/invitations.routes.js';
 import { createMapsRouter } from './modules/maps/maps.routes.js';
 import { createMembersRouter } from './modules/members/members.routes.js';
 import { createOpenApiRouter } from './modules/openapi/openapi.routes.js';
 import { createTripsRouter } from './modules/trips/trips.routes.js';
+import { createUsersRouter } from './modules/users/users.routes.js';
 import { createVotesRouter } from './modules/votes/votes.routes.js';
 import { createItineraryRouter } from './routes/itinerary.js';
 import {
@@ -53,7 +55,9 @@ export function createApp(
   app.use('/api/health', createHealthRouter(config, deps?.prisma));
   app.use('/api', createOpenApiRouter());
   app.use('/api/auth', createAuthRouter(config, deps?.prisma));
+  app.use('/api/users', createUsersRouter(config, deps?.prisma));
   app.use('/api/trips', createTripsRouter(deps?.prisma));
+  app.use('/api', createExportsRouter(deps?.prisma));
   app.use(
     '/api',
     createInvitationsRouter(config, deps?.prisma, deps?.onTripChanged),

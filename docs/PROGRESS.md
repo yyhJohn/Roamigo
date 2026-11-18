@@ -199,3 +199,23 @@
 - **Screenshots & Browser Evidence:**
   - Captured desktop `1440×960` (`m8-budgets-expenses.png`) and verified `mobileOverflow390: false` and `pageErrors: []` in Chrome.
 - **Next Milestone:** **Milestone 9 — Public Landing Polish, User Settings, Privacy Deletion & Exports**
+
+
+---
+
+## Milestone 9 — Public Landing Polish, User Settings, Privacy Deletion & Exports
+
+- **Objective:** Complete the consumer public landing page (`/`), traveller profile & privacy settings (`/settings`), permanent/anonymizing GDPR-style account deletion (`DELETE /api/users/me`), member-scoped portable exports (`JSON`, `RFC 5545 .ics`, formula-safe `.csv`), and print-ready PDF itinerary view (`/trips/:tripId/print`).
+- **Completed Functionality:**
+  - Public Landing completion (`src/components/landing/LandingFeaturesFaq.tsx`, `src/pages/HomePage.tsx`): added 6-pillar full-stack capability overview, honest FAQ section, and navigation footer with zero fabricated statistics or reviews while preserving all AC1–AC5 Instant Sandbox selectors.
+  - Account & Privacy Settings (`src/lib/contracts/user.schemas.ts`, `server/modules/users/{users.service,users.routes}.ts`, `src/lib/useUserSettings.ts`, `src/pages/SettingsPage.tsx`, `src/components/settings/DeleteAccountCard.tsx`): `PATCH /api/users/me` (`displayName`, `avatarColor`, `preferredCurrency`, `preferredLanguage`, `themePreference`, `privacyShareEmail`) and `DELETE /api/users/me` (revokes sessions, deletes owned private trips/votes/invitations, and either deletes the `User` row or anonymizes collaborator expense references so friend ledgers remain intact without retaining PII).
+  - Portable Exports & Print/PDF (`src/lib/domain/exports.ts`, `server/modules/exports/exports.routes.ts`, `src/components/workspace/WorkspaceExportMenu.tsx`, `src/pages/TripPrintPage.tsx`): `GET /api/trips/:tripId/export/{json,ics,csv}` enforcing `TripMember` RBAC (`403` IDOR block), redacting private collaborator emails for non-owners, neutralizing spreadsheet formula prefixes (`=`, `+`, `-`, `@`, `\t`, `\r`), emitting RFC 5545 CRLF `.ics` calendars, and rendering a `@media print` printable itinerary booklet.
+- **Tests Executed & Actual Results:**
+  - `npm run lint` — **PASS**
+  - `npm run typecheck` — **PASS**
+  - `npm run test` — **PASS** (`17` test files, `49` tests including `tests/unit/exports.test.ts` and `tests/api/settings-exports.test.ts`)
+  - `npm run build` — **PASS**
+  - `npm run test:e2e` — **PASS** (`10` Playwright Chrome specs including `tests/e2e/settings-exports.spec.ts`)
+- **Screenshots & Browser Evidence:**
+  - Captured Dark Mode Settings (`m9-settings-dark.png`) and Print/PDF Itinerary View (`m9-print-view.png`), and verified zero horizontal overflow across `375px`, `390px`, `768px`, `1280px`, and `1440px` (`pageErrors: []`, `consoleErrors: []`).
+- **Next Milestone:** **Milestone 10 — Independent Security Audit, Skill Update, Docker Stack & GitHub Actions CI**

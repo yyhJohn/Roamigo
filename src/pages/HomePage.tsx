@@ -1,5 +1,6 @@
 import { BudgetSummaryBar } from '../components/BudgetSummaryBar';
 import { ItineraryPanel } from '../components/ItineraryPanel';
+import { LandingFeaturesFaq } from '../components/landing/LandingFeaturesFaq';
 import { LandingHero } from '../components/landing/LandingHero';
 import { TopMarketingNav } from '../components/layout/TopMarketingNav';
 import { TravellerForm } from '../components/TravellerForm';
@@ -115,6 +116,8 @@ export function HomePage() {
             pushToast(`Set destination to ${city}`, 'success');
           }}
         />
+
+        <LandingFeaturesFaq />
       </main>
     </div>
   );

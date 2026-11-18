@@ -125,5 +125,24 @@ export const OPENAPI_DOCUMENT = {
         responses: { '201': { description: 'Expense recorded & settlements recalculated' } },
       },
     },
+    '/api/users/me': {
+      patch: {
+        summary: 'Update traveller profile, theme, currency, and email privacy preferences',
+        security: [{ sessionCookie: [], csrfHeader: [] }],
+        responses: { '200': { description: 'Updated profile' } },
+      },
+      delete: {
+        summary: 'Delete or anonymize account, revoke sessions, and scrub personal data',
+        security: [{ sessionCookie: [], csrfHeader: [] }],
+        responses: { '200': { description: 'Account deleted' } },
+      },
+    },
+    '/api/trips/{tripId}/export/{format}': {
+      get: {
+        summary: 'Export authorised trip workspace as JSON backup, RFC 5545 ICS calendar, or formula-safe CSV',
+        security: [{ sessionCookie: [] }],
+        responses: { '200': { description: 'Export stream' }, '403': { description: 'Forbidden' } },
+      },
+    },
   },
 } as const;

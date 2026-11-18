@@ -2,6 +2,7 @@ import { Copy, LayoutGrid, Share2, Wallet } from 'lucide-react';
 import type { TripDetailDto } from '../../lib/contracts/tripDetail.types';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
+import { WorkspaceExportMenu } from './WorkspaceExportMenu';
 
 export type WorkspaceMode = 'itinerary' | 'expenses';
 
@@ -75,6 +76,7 @@ export function WorkspaceHeaderActions({
           <Copy className="h-3.5 w-3.5" /> Clone Editable Copy
         </Button>
       )}
+      <WorkspaceExportMenu tripId={summary.id} />
       <Button
         type="button"
         variant="secondary"

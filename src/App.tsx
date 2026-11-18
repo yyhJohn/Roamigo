@@ -8,6 +8,8 @@ import { AuthPage } from './pages/AuthPage';
 import { CreateTripWizardPage } from './pages/CreateTripWizardPage';
 import { HomePage } from './pages/HomePage';
 import { InviteAcceptPage } from './pages/InviteAcceptPage';
+import { SettingsPage } from './pages/SettingsPage';
+import { TripPrintPage } from './pages/TripPrintPage';
 import { TripWorkspacePage } from './pages/TripWorkspacePage';
 import { TripsDashboardPage } from './pages/TripsDashboardPage';
 import { WorkspaceShellPage } from './pages/WorkspaceShellPage';
@@ -73,6 +75,22 @@ export function App() {
               element={
                 <ProtectedRoute>
                   <TripWorkspacePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/trips/:tripId/print"
+              element={
+                <ProtectedRoute>
+                  <TripPrintPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <SettingsPage />
                 </ProtectedRoute>
               }
             />
