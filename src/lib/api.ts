@@ -17,11 +17,20 @@ export class ApiRequestError extends Error {
 export async function generateItineraryApi(
   payload: GenerateItineraryRequest,
 ): Promise<Itinerary> {
-  const response = await fetch('/api/itinerary/generate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
+  let response: Response;
+  try {
+    response = await fetch('/api/itinerary/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  } catch (err) {
+    const detail = err instanceof Error ? err.message : 'Network failure';
+    throw new ApiRequestError(
+      `Unable to reach the itinerary server (${detail}). Your inputs are preserved—please try again.`,
+      0,
+    );
+  }
 
   const rawText = await response.text();
   let data: unknown = null;
@@ -30,7 +39,7 @@ export async function generateItineraryApi(
       data = JSON.parse(rawText);
     } catch {
       throw new ApiRequestError(
-        `Server returned non-JSON response (HTTP ${response.status}).`,
+        `Server returned an unreadable non-JSON response (HTTP ${response.status}). Your inputs are preserved—please try again.`,
         response.status >= 400 ? response.status : 502,
       );
     }
@@ -43,12 +52,15 @@ export async function generateItineraryApi(
       'error' in data &&
       typeof data.error === 'string'
         ? data.error
-        : `Request failed with status ${response.status}`;
+        : `Request failed with HTTP ${response.status}. Your inputs are preserved.`;
     throw new ApiRequestError(message, response.status);
   }
 
   if (!data || typeof data !== 'object' || !('itinerary' in data)) {
-    throw new ApiRequestError('Server returned an unexpected response.', 502);
+    throw new ApiRequestError(
+      'Server returned an unexpected response payload without an itinerary.',
+      502,
+    );
   }
 
   const parsed = ItinerarySchema.safeParse(data.itinerary);

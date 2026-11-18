@@ -1,87 +1,25 @@
-import { useEffect, useState, type FormEvent } from 'react';
-import {
-  CurrencySchema,
-  TripSetupSchema,
-  type Currency,
-  type TripSetup,
-} from '../lib/schemas';
-import { extractFieldErrors } from '../lib/validation';
+import type { FormEvent } from 'react';
+import { CurrencySchema } from '../lib/schemas';
+import type { TripDraft } from '../lib/tripDraft';
 import { FormField } from './FormField';
 
 interface TripSetupFormProps {
-  trip: TripSetup;
-  onUpdateTrip: (trip: TripSetup) => void;
-  onValidityChange: (isValid: boolean) => void;
-}
-
-interface TripDraft {
-  destinationsText: string;
-  startDate: string;
-  endDate: string;
-  groupSizeText: string;
-  currency: Currency;
+  draft: TripDraft;
+  errors: Record<string, string>;
+  onChangeDraft: (patch: Partial<TripDraft>) => void;
 }
 
 const INPUT_CLASS =
   'mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200';
 
-function toDraft(trip: TripSetup): TripDraft {
-  return {
-    destinationsText: trip.destinations.join(', '),
-    startDate: trip.startDate,
-    endDate: trip.endDate,
-    groupSizeText: String(trip.groupSize),
-    currency: trip.currency,
-  };
-}
-
 export function TripSetupForm({
-  trip,
-  onUpdateTrip,
-  onValidityChange,
+  draft,
+  errors,
+  onChangeDraft,
 }: TripSetupFormProps) {
-  const [draft, setDraft] = useState<TripDraft>(() => toDraft(trip));
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    setDraft(toDraft(trip));
-    setErrors({});
-    onValidityChange(true);
-  }, [trip, onValidityChange]);
-
-  function validateAndSync(next: TripDraft) {
-    const parsedGroupSize = Number(next.groupSizeText);
-    const result = TripSetupSchema.safeParse({
-      destinations: next.destinationsText
-        .split(',')
-        .map((d) => d.trim())
-        .filter(Boolean),
-      startDate: next.startDate,
-      endDate: next.endDate,
-      groupSize: Number.isFinite(parsedGroupSize) ? parsedGroupSize : 0,
-      currency: next.currency,
-    });
-
-    if (!result.success) {
-      setErrors(extractFieldErrors(result.error));
-      onValidityChange(false);
-      return;
-    }
-
-    setErrors({});
-    onValidityChange(true);
-    onUpdateTrip(result.data);
-  }
-
-  function updateDraft(patch: Partial<TripDraft>) {
-    const next = { ...draft, ...patch };
-    setDraft(next);
-    validateAndSync(next);
-  }
-
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    validateAndSync(draft);
+    onChangeDraft({});
   }
 
   return (
@@ -100,12 +38,13 @@ export function TripSetupForm({
           id="trip-destinations"
           label="Destination(s) (comma-separated)"
           error={errors.destinations}
+          errorTestId="error-trip-destinations"
         >
           <input
             id="trip-destinations"
             type="text"
             value={draft.destinationsText}
-            onChange={(e) => updateDraft({ destinationsText: e.target.value })}
+            onChange={(e) => onChangeDraft({ destinationsText: e.target.value })}
             placeholder="e.g. Barcelona"
             className={INPUT_CLASS}
           />
@@ -116,22 +55,28 @@ export function TripSetupForm({
             id="trip-start-date"
             label="Start Date"
             error={errors.startDate}
+            errorTestId="error-trip-start-date"
           >
             <input
               id="trip-start-date"
               type="date"
               value={draft.startDate}
-              onChange={(e) => updateDraft({ startDate: e.target.value })}
+              onChange={(e) => onChangeDraft({ startDate: e.target.value })}
               className={INPUT_CLASS}
             />
           </FormField>
 
-          <FormField id="trip-end-date" label="End Date" error={errors.endDate}>
+          <FormField
+            id="trip-end-date"
+            label="End Date"
+            error={errors.endDate}
+            errorTestId="error-trip-end-date"
+          >
             <input
               id="trip-end-date"
               type="date"
               value={draft.endDate}
-              onChange={(e) => updateDraft({ endDate: e.target.value })}
+              onChange={(e) => onChangeDraft({ endDate: e.target.value })}
               className={INPUT_CLASS}
             />
           </FormField>
@@ -142,6 +87,7 @@ export function TripSetupForm({
             id="trip-group-size"
             label="Group Size"
             error={errors.groupSize}
+            errorTestId="error-trip-group-size"
           >
             <input
               id="trip-group-size"
@@ -149,7 +95,7 @@ export function TripSetupForm({
               min={1}
               max={20}
               value={draft.groupSizeText}
-              onChange={(e) => updateDraft({ groupSizeText: e.target.value })}
+              onChange={(e) => onChangeDraft({ groupSizeText: e.target.value })}
               className={INPUT_CLASS}
             />
           </FormField>
@@ -161,7 +107,7 @@ export function TripSetupForm({
               onChange={(e) => {
                 const parsed = CurrencySchema.safeParse(e.target.value);
                 if (parsed.success) {
-                  updateDraft({ currency: parsed.data });
+                  onChangeDraft({ currency: parsed.data });
                 }
               }}
               className={`${INPUT_CLASS} bg-white`}

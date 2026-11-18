@@ -147,7 +147,29 @@ test.describe('Roamigo acceptance criteria', () => {
     await page.reload();
     await expect(page.getByTestId('traveller-card-Alice')).toBeVisible();
     await expect(page.getByTestId('traveller-card-Bob')).toBeVisible();
+
+    // Regression: invalid trip draft blocks generation and Reset Trip clears stale errors
+    await page.fill('#trip-destinations', '');
+    await expect(page.getByTestId('error-trip-destinations')).toBeVisible();
+    await page.getByTestId('generate-itinerary-btn').click();
+    await expect(page.getByTestId('itinerary-error')).toContainText(
+      'Fix the trip setup errors',
+    );
+    await page.click('button:has-text("Reset Trip")');
+    await expect(page.getByTestId('error-trip-destinations')).toHaveCount(0);
+    await expect(page.locator('#trip-destinations')).toHaveValue('Barcelona');
+
     expect(errors).toEqual([]);
+  });
+
+  test('regression: corrupted localStorage surfaces recovery warning', async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      window.localStorage.setItem('roamigo:v1:trip', '{corrupted-json');
+    });
+    await page.reload();
+    await expect(page.getByTestId('storage-warning')).toBeVisible();
   });
 
   test('AC3 error state when server AI credentials are unconfigured', async ({

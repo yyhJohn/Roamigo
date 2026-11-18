@@ -5,14 +5,12 @@ import {
   countIncludedActivities,
   evaluateTravellerBudgets,
 } from './budget';
-import {
-  TripSetupSchema,
-  type Itinerary,
-  type PersistedTripState,
-  type Traveller,
-  type TravellerInput,
-  type TripSetup,
-  type VoteDirection,
+import type {
+  Itinerary,
+  PersistedTripState,
+  Traveller,
+  TravellerInput,
+  VoteDirection,
 } from './schemas';
 import {
   clearTripState,
@@ -20,6 +18,7 @@ import {
   loadTripState,
   saveTripState,
 } from './storage';
+import { toTripDraft, validateTripDraft, type TripDraft } from './tripDraft';
 import { castVote } from './voting';
 
 export type GenerationStatus = 'idle' | 'loading' | 'success' | 'error';
@@ -27,10 +26,13 @@ export type GenerationStatus = 'idle' | 'loading' | 'success' | 'error';
 export function useTripState() {
   const [initialLoad] = useState(() => loadTripState());
   const [state, setState] = useState<PersistedTripState>(initialLoad.state);
+  const [tripDraft, setTripDraft] = useState<TripDraft>(() =>
+    toTripDraft(initialLoad.state.trip),
+  );
+  const [tripErrors, setTripErrors] = useState<Record<string, string>>({});
   const [storageWarning, setStorageWarning] = useState<string | null>(
     initialLoad.warning,
   );
-  const [isTripFormValid, setIsTripFormValid] = useState(true);
   const [activeVoterId, setActiveVoterId] = useState<string | null>(
     () => initialLoad.state.travellers[0]?.id ?? null,
   );
@@ -39,9 +41,9 @@ export function useTripState() {
   const [generationError, setGenerationError] = useState<string | null>(null);
 
   useEffect(() => {
-    const ok = saveTripState(state);
-    if (!ok) {
-      setStorageWarning('Changes could not be saved to browser storage.');
+    const writeResult = saveTripState(state);
+    if (!writeResult.ok) {
+      setStorageWarning(writeResult.warning);
     }
   }, [state]);
 
@@ -50,14 +52,21 @@ export function useTripState() {
       setActiveVoterId(null);
       return;
     }
-    const stillExists = state.travellers.some((t) => t.id === activeVoterId);
-    if (!stillExists) {
+    if (!state.travellers.some((t) => t.id === activeVoterId)) {
       setActiveVoterId(state.travellers[0]?.id ?? null);
     }
   }, [state.travellers, activeVoterId]);
 
-  const updateTrip = useCallback((trip: TripSetup) => {
-    setState((prev) => ({ ...prev, trip }));
+  const updateTripDraft = useCallback((patch: Partial<TripDraft>) => {
+    setTripDraft((prevDraft) => {
+      const nextDraft = { ...prevDraft, ...patch };
+      const check = validateTripDraft(nextDraft);
+      setTripErrors(check.errors);
+      if (check.ok) {
+        setState((prevState) => ({ ...prevState, trip: check.trip }));
+      }
+      return nextDraft;
+    });
   }, []);
 
   const addTraveller = useCallback((input: TravellerInput) => {
@@ -124,8 +133,9 @@ export function useTripState() {
 
   const generateItinerary = useCallback(async () => {
     if (generationStatus === 'loading') return;
-    const tripCheck = TripSetupSchema.safeParse(state.trip);
-    if (!isTripFormValid || !tripCheck.success) {
+    const check = validateTripDraft(tripDraft);
+    setTripErrors(check.errors);
+    if (!check.ok) {
       setGenerationStatus('error');
       setGenerationError('Fix the trip setup errors before generating.');
       return;
@@ -140,7 +150,7 @@ export function useTripState() {
     setGenerationError(null);
     try {
       const itinerary = await generateItineraryApi({
-        trip: tripCheck.data,
+        trip: check.trip,
         travellers: state.travellers,
       });
       setState((prev) => ({ ...prev, itinerary, votes: {} }));
@@ -151,13 +161,15 @@ export function useTripState() {
         err instanceof Error ? err.message : 'Failed to generate itinerary.',
       );
     }
-  }, [generationStatus, isTripFormValid, state.trip, state.travellers]);
+  }, [generationStatus, tripDraft, state.travellers]);
 
   const resetTrip = useCallback(() => {
-    clearTripState();
-    setState(createDefaultTripState());
-    setIsTripFormValid(true);
-    setStorageWarning(null);
+    const clearResult = clearTripState();
+    const defaultState = createDefaultTripState();
+    setState(defaultState);
+    setTripDraft(toTripDraft(defaultState.trip));
+    setTripErrors({});
+    setStorageWarning(clearResult.warning);
     setGenerationStatus('idle');
     setGenerationError(null);
   }, []);
@@ -175,16 +187,17 @@ export function useTripState() {
 
   return {
     state,
+    tripDraft,
+    tripErrors,
     storageWarning,
     activeVoterId,
     setActiveVoterId,
-    setIsTripFormValid,
     generationStatus,
     generationError,
     estimatedCostPerPerson,
     activityCounts,
     budgetStatuses,
-    updateTrip,
+    updateTripDraft,
     addTraveller,
     updateTravellerBudget,
     removeTraveller,

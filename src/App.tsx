@@ -8,16 +8,17 @@ import { useTripState } from './lib/useTripState';
 export function App() {
   const {
     state,
+    tripDraft,
+    tripErrors,
     storageWarning,
     activeVoterId,
     setActiveVoterId,
-    setIsTripFormValid,
     generationStatus,
     generationError,
     estimatedCostPerPerson,
     activityCounts,
     budgetStatuses,
-    updateTrip,
+    updateTripDraft,
     addTraveller,
     updateTravellerBudget,
     removeTraveller,
@@ -54,6 +55,7 @@ export function App() {
         {storageWarning && (
           <div
             role="status"
+            data-testid="storage-warning"
             className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs font-medium text-amber-800"
           >
             {storageWarning}
@@ -61,7 +63,7 @@ export function App() {
         )}
 
         <BudgetSummaryBar
-          currency={state.trip.currency}
+          currency={tripDraft.currency}
           estimatedCostPerPerson={estimatedCostPerPerson}
           includedCount={activityCounts.included}
           totalCount={activityCounts.total}
@@ -72,18 +74,18 @@ export function App() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
           <div className="space-y-6 lg:col-span-5">
             <TripSetupForm
-              trip={state.trip}
-              onUpdateTrip={updateTrip}
-              onValidityChange={setIsTripFormValid}
+              draft={tripDraft}
+              errors={tripErrors}
+              onChangeDraft={updateTripDraft}
             />
             <TravellerForm
-              currency={state.trip.currency}
+              currency={tripDraft.currency}
               existingTravellers={state.travellers}
               onAddTraveller={addTraveller}
             />
             <TravellerList
               travellers={state.travellers}
-              currency={state.trip.currency}
+              currency={tripDraft.currency}
               budgetStatuses={budgetStatuses}
               hasItinerary={state.itinerary !== null}
               onRemoveTraveller={removeTraveller}
@@ -93,7 +95,7 @@ export function App() {
 
           <div className="lg:col-span-7">
             <ItineraryPanel
-              currency={state.trip.currency}
+              currency={tripDraft.currency}
               travellers={state.travellers}
               itinerary={state.itinerary}
               votes={state.votes}
