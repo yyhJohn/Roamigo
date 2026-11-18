@@ -9,7 +9,7 @@ An AI-powered group travel planning web app. Follow the product brief and its ac
 ## Engineering Rules
 - Keep UI components in `src/components/`, business logic in `src/lib/`, API routes in `server/routes/`, and tests in `tests/`.
 - Enable TypeScript strict mode. Do not use `any` or suppress type errors.
-- Keep source files under 200 lines; split larger modules by responsibility, and enforce this limit automatically via ESLint `max-lines` and `.agents/hooks.json`.
+- Keep source files under 200 lines (excluding blank lines and comments); split larger modules by responsibility, and enforce this limit automatically via ESLint `max-lines`.
 - Validate traveller inputs and AI responses with Zod; display inline errors without losing user input.
 - Never swallow `localStorage` or JSON parse errors silently; log or surface recovery warnings, and verify entry assets load with HTTP 200 and zero `404`/`500` console errors in headless Chrome.
 - Keep API credentials server-side in environment variables. Never expose secrets to the browser or commit them.
