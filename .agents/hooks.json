@@ -1,0 +1,16 @@
+{
+  "line-limit-guard": {
+    "PostToolUse": [
+      {
+        "matcher": "write_file|edit_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ./scripts/check-line-limit.mjs",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
