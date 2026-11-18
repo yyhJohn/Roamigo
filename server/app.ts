@@ -7,6 +7,9 @@ import {
   applySecurityMiddleware,
   createScopedRateLimiter,
 } from './middleware/security.js';
+import { createTravelAiProvider } from './modules/ai/ai.factory.js';
+import { createWorkspaceAiRouter } from './modules/ai/ai.routes.js';
+import type { TravelAIProvider } from './modules/ai/ai.types.js';
 import { createAuthRouter } from './modules/auth/auth.routes.js';
 import { createHealthRouter } from './modules/health/health.routes.js';
 import { createInvitationsRouter } from './modules/invitations/invitations.routes.js';
@@ -21,6 +24,7 @@ import {
 
 export interface AppDependencies {
   prisma?: PrismaClient;
+  aiProvider?: TravelAIProvider;
 }
 
 export function createApp(
@@ -38,6 +42,7 @@ export function createApp(
   app.use(createSessionHydrator(deps?.prisma));
 
   const generator = generatorOverride ?? createGeminiGenerator(config);
+  const aiProvider = deps?.aiProvider ?? createTravelAiProvider(config);
   const aiLimiter = createScopedRateLimiter(config, 15, 60_000);
 
   app.use('/api/health', createHealthRouter(config, deps?.prisma));
@@ -46,6 +51,7 @@ export function createApp(
   app.use('/api/trips', createTripsRouter(deps?.prisma));
   app.use('/api', createInvitationsRouter(config, deps?.prisma));
   app.use('/api', createMembersRouter(deps?.prisma));
+  app.use('/api', createWorkspaceAiRouter(config, aiProvider, deps?.prisma));
   app.use('/api/itinerary', aiLimiter, createItineraryRouter(generator));
 
   app.use('/api/*', (_req, res) => {

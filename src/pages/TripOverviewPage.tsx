@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Copy, Share2, Users } from 'lucide-react';
 import { AppShell } from '../components/layout/AppShell';
 import { TripMembersModal } from '../components/trips/TripMembersModal';
+import { AiAssistantPanel } from '../components/workspace/AiAssistantPanel';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
@@ -104,6 +105,7 @@ export function TripOverviewPage() {
               </div>
             ))}
           </Card>
+          <AiAssistantPanel detail={detail} />
         </div>
 
         <div className="space-y-4 lg:col-span-8">

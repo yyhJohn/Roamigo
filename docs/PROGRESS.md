@@ -119,3 +119,21 @@
 - **Screenshots & Browser Evidence:**
   - Verified desktop My Trips Dashboard (`m4-my-trips.png`) and 10-Step Create Trip Wizard (`m4-wizard.png`) in Chrome.
 - **Next Milestone:** **Milestone 5 — Multi-Provider AI Engine & Staged Assistant Proposals**
+
+
+---
+
+## Milestone 5 — Multi-Provider AI Engine & Staged Assistant Proposals
+
+- **Objective:** Implement a multi-provider AI itinerary & assistant abstraction (`gemini-api`, `vertex-ai`, `openai`, `openai-compatible`), PII minimisation, bounded retry, `AbortSignal` cancellation, `AIRequest` audit logging, and staged Before/After assistant proposals with deterministic minor-unit budget impact that never mutate saved plans or votes until explicitly confirmed.
+- **Completed Functionality:**
+  - Shared Zod AI schemas (`src/lib/contracts/ai.schemas.ts`) enforcing strict validation on upstream structured JSON outputs.
+  - Multi-provider backend modules (`server/modules/ai/{ai.types,ai.prompts,ai.diff,ai.persistence,ai.audit,ai.service,ai.factory,ai.routes}.ts` and `server/modules/ai/providers/{geminiProvider,openaiProvider}.ts`) with zero raw member email leakage in prompts, `AIRequest` DB audit logging (`SUCCESS`/`FAILED`, `durationMs`, `errorCode`), and `stableKey` vote carryover across itinerary versions.
+  - Workspace AI Assistant UI (`src/components/workspace/{AiAssistantPanel,AiProposalDiffCard,useAiAssistant}.ts(x)`) supporting full itinerary generation, quick prompts, `AbortController` request cancellation, retry banners, and staged Before/After diff previews.
+- **Tests Executed & Actual Results:**
+  - `npm run lint` — **PASS**
+  - `npm run typecheck` — **PASS**
+  - `npm run test` — **PASS** (`10` test files, `36` tests including `tests/api/ai-engine.test.ts`)
+  - `npm run build` — **PASS**
+  - `npm run test:e2e` — **PASS** (`6` Playwright Chrome specs)
+- **Next Milestone:** **Milestone 6 — Flagship 3-Panel Main Trip Workspace & Interactive MapLibre Map**
