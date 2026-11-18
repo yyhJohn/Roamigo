@@ -23,6 +23,7 @@ import {
 export function createInvitationsRouter(
   config: ServerConfig,
   prisma?: PrismaClient,
+  onTripChanged?: (tripId: string) => void,
 ): Router {
   const router = Router();
 
@@ -113,6 +114,7 @@ export function createInvitationsRouter(
         throw notFound('Invitation not found.');
       }
       const tripId = await acceptInvitationToken(prisma, auth.user, rawToken);
+      onTripChanged?.(tripId);
       sendOk(res, { tripId });
     }),
   );

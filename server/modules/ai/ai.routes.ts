@@ -25,6 +25,7 @@ export function createWorkspaceAiRouter(
   config: ServerConfig,
   aiProvider: TravelAIProvider,
   prisma?: PrismaClient,
+  onTripChanged?: (tripId: string) => void,
 ): Router {
   const router = Router();
   const aiLimiter = createScopedRateLimiter(config, 15, 60_000);
@@ -46,6 +47,7 @@ export function createWorkspaceAiRouter(
         auth.user,
         access.trip.id,
       );
+      onTripChanged?.(access.trip.id);
       sendOk(res, out);
     }),
   );
@@ -92,6 +94,7 @@ export function createWorkspaceAiRouter(
         input.summary,
         input.days,
       );
+      onTripChanged?.(access.trip.id);
       sendOk(res, out);
     }),
   );

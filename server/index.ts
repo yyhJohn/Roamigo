@@ -6,12 +6,18 @@ import { createApp } from './app.js';
 import { loadServerConfig } from './config.js';
 import { disconnectPrisma, getPrismaClient } from './db/prisma.js';
 import { logger } from './lib/logger.js';
+import { attachTripRealtimeHub, type TripRealtimeHub } from './realtime/socketServer.js';
 
 const config = loadServerConfig();
 const prisma = config.databaseUrl
   ? getPrismaClient(config.databaseUrl)
   : undefined;
-const app = createApp(config, undefined, { prisma });
+
+const hubRef: { current?: TripRealtimeHub } = {};
+const app = createApp(config, undefined, {
+  prisma,
+  onTripChanged: (tripId) => hubRef.current?.broadcastTripChanged(tripId),
+});
 
 if (process.env.NODE_ENV === 'production') {
   const currentDir = path.dirname(fileURLToPath(import.meta.url));
@@ -23,9 +29,10 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 const httpServer = http.createServer(app);
+hubRef.current = attachTripRealtimeHub(httpServer, config, prisma);
 
 httpServer.listen(config.port, () => {
-  logger.info(`Roamigo API server listening on port ${config.port}`, {
+  logger.info(`Roamigo API + Realtime server listening on port ${config.port}`, {
     port: config.port,
     dbConfigured: Boolean(config.databaseUrl),
   });
@@ -33,6 +40,7 @@ httpServer.listen(config.port, () => {
 
 async function shutdown(signal: string): Promise<void> {
   logger.info(`Shutting down server (${signal})`);
+  await hubRef.current?.close();
   httpServer.close(async () => {
     await disconnectPrisma();
     process.exit(0);

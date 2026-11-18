@@ -6,21 +6,24 @@ import {
   GripVertical,
   MapPin,
   Pencil,
-  ThumbsDown,
-  ThumbsUp,
   Trash2,
 } from 'lucide-react';
 import type { WorkspaceActivityDto } from '../../lib/contracts/tripDetail.types';
 import { formatMinorCurrency } from '../../lib/domain/money';
 import type { Currency } from '../../lib/schemas';
 import { Badge } from '../ui/Badge';
+import { ActivityVotingBar } from './ActivityVotingBar';
 
 interface WorkspaceActivityCardProps {
+  tripId: string;
   activity: WorkspaceActivityDto;
   currency: Currency;
+  memberCount: number;
+  viewerUserId: string | undefined;
   index: number;
   totalInDay: number;
   isSelected: boolean;
+  canVote: boolean;
   canEdit: boolean;
   onSelect: () => void;
   onMoveUp: () => void;
@@ -33,11 +36,15 @@ interface WorkspaceActivityCardProps {
 }
 
 export function WorkspaceActivityCard({
+  tripId,
   activity,
   currency,
+  memberCount,
+  viewerUserId,
   index,
   totalInDay,
   isSelected,
+  canVote,
   canEdit,
   onSelect,
   onMoveUp,
@@ -48,8 +55,6 @@ export function WorkspaceActivityCard({
   onDragStart,
   onDropOnThis,
 }: WorkspaceActivityCardProps) {
-  const upVotes = activity.votes.filter((v) => v.direction === 'UP').length;
-  const downVotes = activity.votes.filter((v) => v.direction === 'DOWN').length;
   const hasCoords = activity.lat !== null && activity.lng !== null;
 
   return (
@@ -90,9 +95,6 @@ export function WorkspaceActivityCard({
                   {activity.endTime ? `–${activity.endTime}` : ''}
                 </span>
               )}
-              {activity.decisionStatus === 'LOCKED_IN' && (
-                <Badge variant="success">Locked In</Badge>
-              )}
             </div>
             <h4 className="mt-1.5 font-display text-sm font-bold text-[var(--text-primary)]">
               {activity.title}
@@ -100,46 +102,37 @@ export function WorkspaceActivityCard({
           </div>
         </div>
 
-        <div className="text-right">
-          <span className="font-display text-xs font-extrabold">
-            {formatMinorCurrency(activity.estimatedCostMinor, currency, {
-              est: true,
-            })}
-          </span>
-        </div>
+        <span className="shrink-0 font-display text-xs font-extrabold">
+          {formatMinorCurrency(activity.estimatedCostMinor, currency, {
+            est: true,
+          })}
+        </span>
       </div>
 
       <p className="mt-1.5 leading-relaxed text-[var(--text-secondary)]">
         {activity.description}
       </p>
 
-      <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border-default)] pt-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            data-testid={`focus-map-${activity.id}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              onSelect();
-            }}
-            className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)]"
-          >
-            <MapPin
-              className={`h-3.5 w-3.5 ${
-                hasCoords
-                  ? 'text-[var(--brand-primary)]'
-                  : 'text-[var(--text-muted)]'
-              }`}
-            />
-            {activity.locationName ||
-              (hasCoords ? 'Pinned on map' : 'Unmapped stop')}
-          </button>
-
-          <span className="inline-flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)]">
-            <ThumbsUp className="h-3 w-3" /> {upVotes}
-            <ThumbsDown className="ml-1 h-3 w-3" /> {downVotes}
-          </span>
-        </div>
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+        <button
+          type="button"
+          data-testid={`focus-map-${activity.id}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelect();
+          }}
+          className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)]"
+        >
+          <MapPin
+            className={`h-3.5 w-3.5 ${
+              hasCoords
+                ? 'text-[var(--brand-primary)]'
+                : 'text-[var(--text-muted)]'
+            }`}
+          />
+          {activity.locationName ||
+            (hasCoords ? 'Pinned on map' : 'Unmapped stop')}
+        </button>
 
         {canEdit && (
           <div
@@ -158,7 +151,6 @@ export function WorkspaceActivityCard({
               ) : (
                 <Circle className="h-3.5 w-3.5 text-[var(--text-muted)]" />
               )}
-              {activity.included ? 'Included' : 'Excluded'}
             </button>
             <button
               type="button"
@@ -201,6 +193,15 @@ export function WorkspaceActivityCard({
           </div>
         )}
       </div>
+
+      <ActivityVotingBar
+        tripId={tripId}
+        activity={activity}
+        memberCount={memberCount}
+        viewerUserId={viewerUserId}
+        canVote={canVote}
+        canEdit={canEdit}
+      />
     </article>
   );
 }

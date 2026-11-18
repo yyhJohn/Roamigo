@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { AlertTriangle, CalendarPlus, Users } from 'lucide-react';
+import { AlertTriangle, CalendarPlus } from 'lucide-react';
 import type { TripDetailDto } from '../../lib/contracts/tripDetail.types';
+import { computeTripConsensusPercentage } from '../../lib/domain/consensus';
 import { formatMinorCurrency } from '../../lib/domain/money';
 import { useAddDayMutation } from '../../lib/useWorkspaceActivities';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { useToast } from '../ui/ToastProvider';
+import { TravellerProfilesCard } from './TravellerProfilesCard';
 
 interface WorkspaceLeftRailProps {
   detail: TripDetailDto;
@@ -30,6 +32,10 @@ export function WorkspaceLeftRail({
 
   const overBudgetProfiles = preferences.filter(
     (p) => summary.estimatedPerPersonMinor > p.budgetMinor,
+  );
+  const consensusPulse = computeTripConsensusPercentage(
+    itinerary?.days ?? [],
+    detail.members.length,
   );
 
   async function handleCreateDay(e: React.FormEvent) {
@@ -147,6 +153,18 @@ export function WorkspaceLeftRail({
       </Card>
 
       <Card className="space-y-2.5 p-4">
+        <div className="flex items-center justify-between text-xs">
+          <span className="font-semibold text-[var(--text-secondary)]">
+            Group Agreement
+          </span>
+          <span
+            data-testid="trip-consensus-pct"
+            className="font-display font-extrabold text-[var(--brand-primary)]"
+          >
+            {consensusPulse.percentage}% ({consensusPulse.agreedCount}/
+            {consensusPulse.totalIncluded})
+          </span>
+        </div>
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold text-[var(--text-secondary)]">
             Est. Itinerary / Person
@@ -172,35 +190,10 @@ export function WorkspaceLeftRail({
         )}
       </Card>
 
-      <Card className="space-y-2.5 p-4">
-        <div className="flex items-center justify-between">
-          <h3 className="font-display text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">
-            Traveller Profiles
-          </h3>
-          <Badge variant="outline">
-            <Users className="mr-1 h-3 w-3" />
-            {preferences.length}
-          </Badge>
-        </div>
-        <div className="space-y-2">
-          {preferences.map((p) => (
-            <div
-              key={p.id}
-              className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-canvas)] p-2.5 text-xs"
-            >
-              <div className="flex items-center justify-between font-semibold">
-                <span>{p.displayName}</span>
-                <span>
-                  {formatMinorCurrency(p.budgetMinor, summary.currency)} cap
-                </span>
-              </div>
-              <p className="mt-0.5 text-[11px] text-[var(--text-secondary)]">
-                {p.pace} · {p.interests.slice(0, 3).join(', ')}
-              </p>
-            </div>
-          ))}
-        </div>
-      </Card>
+      <TravellerProfilesCard
+        preferences={preferences}
+        currency={summary.currency}
+      />
     </div>
   );
 }

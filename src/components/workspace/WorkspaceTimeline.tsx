@@ -5,6 +5,7 @@ import type {
   WorkspaceActivityDto,
 } from '../../lib/contracts/tripDetail.types';
 import { formatMinorCurrency } from '../../lib/domain/money';
+import { useSessionQuery } from '../../lib/useAuth';
 import {
   useAddDayMutation,
   useDeleteActivityMutation,
@@ -23,6 +24,7 @@ interface WorkspaceTimelineProps {
   selectedDayNumber: number | null;
   selectedActivityId: string | null;
   onSelectActivity: (activityId: string) => void;
+  canVote: boolean;
   canEdit: boolean;
 }
 
@@ -31,9 +33,12 @@ export function WorkspaceTimeline({
   selectedDayNumber,
   selectedActivityId,
   onSelectActivity,
+  canVote,
   canEdit,
 }: WorkspaceTimelineProps) {
   const { summary, itinerary } = detail;
+  const sessionQuery = useSessionQuery();
+  const viewerUserId = sessionQuery.data?.user?.id;
   const addDayMut = useAddDayMutation(summary.id);
   const updateMut = useUpdateActivityMutation(summary.id);
   const deleteMut = useDeleteActivityMutation(summary.id);
@@ -115,30 +120,25 @@ export function WorkspaceTimeline({
                   {day.activities.map((act, idx) => (
                     <WorkspaceActivityCard
                       key={act.id}
+                      tripId={summary.id}
                       activity={act}
                       currency={summary.currency}
+                      memberCount={detail.members.length}
+                      viewerUserId={viewerUserId}
                       index={idx}
                       totalInDay={day.activities.length}
                       isSelected={selectedActivityId === act.id}
+                      canVote={canVote}
                       canEdit={canEdit}
                       onSelect={() => onSelectActivity(act.id)}
                       onMoveUp={() =>
-                        void reorderMut.mutateAsync({
-                          activityId: act.id,
-                          direction: 'UP',
-                        })
+                        void reorderMut.mutateAsync({ activityId: act.id, direction: 'UP' })
                       }
                       onMoveDown={() =>
-                        void reorderMut.mutateAsync({
-                          activityId: act.id,
-                          direction: 'DOWN',
-                        })
+                        void reorderMut.mutateAsync({ activityId: act.id, direction: 'DOWN' })
                       }
                       onToggleIncluded={() =>
-                        void updateMut.mutateAsync({
-                          activityId: act.id,
-                          patch: { included: !act.included },
-                        })
+                        void updateMut.mutateAsync({ activityId: act.id, patch: { included: !act.included } })
                       }
                       onEdit={() => {
                         setEditingActivity(act);

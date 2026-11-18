@@ -158,3 +158,23 @@
 - **Screenshots & Browser Evidence:**
   - Captured desktop `1440×920` (`m6-workspace-desktop.png`) and mobile `390×844` (`m6-workspace-mobile.png`, verified `mobileOverflow390: false`, `mobileOverflow375: false`, `pageErrors: []`).
 - **Next Milestone:** **Milestone 7 — Server-Authoritative Voting & Real-Time Socket.IO Sync**
+
+
+---
+
+## Milestone 7 — Server-Authoritative Voting & Real-Time Socket.IO Sync
+
+- **Objective:** Implement server-authoritative 1-vote-per-user-per-activity voting (`UNIQUE(activityId, userId)`), deterministic consensus & conflict status badges, organiser `LOCKED_IN`/`EXCLUDED` decision finalisation, and cookie-authenticated Socket.IO room synchronization (`trip:<tripId>`) verified across two simultaneous browser contexts.
+- **Completed Functionality:**
+  - Pure consensus domain logic (`src/lib/domain/consensus.ts`) classifying `LOCKED_IN`, `EXCLUDED`, `UNANIMOUS`, `MAJORITY_DISAGREEMENT`, `CONTESTED`, `IN_PROGRESS`, and `PENDING`, plus trip-level consensus percentage.
+  - Shared Zod vote/decision schemas (`src/lib/contracts/vote.schemas.ts`) and backend voting module (`server/modules/votes/{votes.service,votes.routes}.ts`) enforcing `OWNER`/`EDITOR`/`MEMBER` voter RBAC (`403` for `VIEWER`) and incrementing `trip.version`.
+  - Authenticated Socket.IO hub (`server/realtime/socketServer.ts`) validating the `HttpOnly` `roamigo_session` cookie on handshake, checking `TripMember` access before joining `trip:<tripId>` (preventing WebSocket IDOR), broadcasting `presence:update` and `trip:changed`, and wired into `server/index.ts` and `vite.config.ts`.
+  - Frontend live sync hook (`src/lib/useTripRealtimeSync.ts`), vote mutations (`src/lib/useWorkspaceVotes.ts`), and interactive `<ActivityVotingBar />` (`src/components/workspace/ActivityVotingBar.tsx`).
+  - Added dependencies with justification: `socket.io` and `socket.io-client` (authenticated WebSocket + fallback room synchronization for multi-member live voting, presence, and itinerary updates).
+- **Tests Executed & Actual Results:**
+  - `npm run lint` — **PASS**
+  - `npm run typecheck` — **PASS**
+  - `npm run test` — **PASS** (`13` test files, `40` tests including `tests/unit/consensus.test.ts` and `tests/api/votes-realtime.test.ts`)
+  - `npm run build` — **PASS**
+  - `npm run test:e2e` — **PASS** (`8` Playwright Chrome specs including two-browser-context `tests/e2e/realtime-voting.spec.ts`)
+- **Next Milestone:** **Milestone 8 — Integer Minor-Unit Budgets, Expense Splitting & Settlements**

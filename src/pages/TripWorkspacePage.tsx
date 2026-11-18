@@ -17,6 +17,7 @@ import {
   WorkspaceMobileNav,
 } from '../components/workspace/WorkspaceMobileNav';
 import { WorkspaceTimeline } from '../components/workspace/WorkspaceTimeline';
+import { useTripRealtimeSync } from '../lib/useTripRealtimeSync';
 import { useCloneTripMutation, useTripDetailQuery } from '../lib/useTrips';
 
 type RightTab = 'map' | 'ai' | 'budget';
@@ -26,6 +27,7 @@ export function TripWorkspacePage() {
   const navigate = useNavigate();
   const { pushToast } = useToast();
   const { data: detail, isLoading, error } = useTripDetailQuery(tripId);
+  const { connected, onlineCount } = useTripRealtimeSync(tripId);
   const cloneMutation = useCloneTripMutation();
 
   const [membersOpen, setMembersOpen] = useState(false);
@@ -61,6 +63,7 @@ export function TripWorkspacePage() {
   const canEdit =
     !isReadOnlyDemo &&
     (summary.myRole === 'OWNER' || summary.myRole === 'EDITOR');
+  const canVote = !isReadOnlyDemo && summary.myRole !== 'VIEWER';
 
   async function handleCloneDemo() {
     const res = await cloneMutation.mutateAsync(summary.id);
@@ -74,7 +77,13 @@ export function TripWorkspacePage() {
       subtitle={`${summary.destinations.join(' · ')} · ${summary.startDate} → ${summary.endDate}`}
       headerActions={
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="outline">Sync v{summary.version}</Badge>
+          <Badge
+            variant={connected ? 'mint' : 'outline'}
+            data-testid="realtime-status-badge"
+          >
+            {connected ? `Live (${onlineCount} online)` : 'Reconnecting'} · v
+            {summary.version}
+          </Badge>
           {isReadOnlyDemo && (
             <Button
               type="button"
@@ -126,6 +135,7 @@ export function TripWorkspacePage() {
               setSelectedActivityId(id);
               setRightTab('map');
             }}
+            canVote={canVote}
             canEdit={canEdit}
           />
         </div>
