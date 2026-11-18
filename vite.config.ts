@@ -7,7 +7,8 @@ const apiPort = process.env.PORT || '3001';
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   optimizeDeps: {
-    include: ['maplibre-gl', 'socket.io-client'],
+    include: ['recharts', 'socket.io-client'],
+    exclude: ['maplibre-gl'],
   },
   server: {
     proxy: {

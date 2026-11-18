@@ -1,13 +1,16 @@
-import { Wallet } from 'lucide-react';
+import { ArrowUpRight, Wallet } from 'lucide-react';
 import type { TripDetailDto } from '../../lib/contracts/tripDetail.types';
 import { formatMinorCurrency } from '../../lib/domain/money';
 import { Badge } from '../ui/Badge';
+import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 
 export function WorkspaceBudgetQuickCard({
   detail,
+  onOpenFullDashboard,
 }: {
   detail: TripDetailDto;
+  onOpenFullDashboard?: () => void;
 }) {
   const { summary, budget, expenses, settlements } = detail;
   const totalLoggedMinor = expenses.reduce((sum, e) => sum + e.amountMinor, 0);
@@ -61,6 +64,20 @@ export function WorkspaceBudgetQuickCard({
         {expenses.length} logged expense(s) · {unsettledCount} open settlement
         transfer(s).
       </div>
+
+      {onOpenFullDashboard && (
+        <Button
+          type="button"
+          size="sm"
+          variant="secondary"
+          className="w-full"
+          data-testid="open-full-expenses-btn"
+          onClick={onOpenFullDashboard}
+        >
+          Open Full Expense Splits & Charts
+          <ArrowUpRight className="h-3.5 w-3.5" />
+        </Button>
+      )}
     </Card>
   );
 }

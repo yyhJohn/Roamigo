@@ -178,3 +178,24 @@
   - `npm run build` — **PASS**
   - `npm run test:e2e` — **PASS** (`8` Playwright Chrome specs including two-browser-context `tests/e2e/realtime-voting.spec.ts`)
 - **Next Milestone:** **Milestone 8 — Integer Minor-Unit Budgets, Expense Splitting & Settlements**
+
+
+---
+
+## Milestone 8 — Integer Minor-Unit Budgets, Expense Splitting & Settlements
+
+- **Objective:** Implement deterministic integer minor-unit (`pence`/`cents`) group budgets, shared expense splitting (`EQUAL`, `CUSTOM`, `PERCENTAGE`), single-currency enforcement, minimum-transfer debt simplification, `MARKED_PAID` settlement reconciliation, and visual spend analytics while keeping estimated (`est.`) activity costs strictly separate from actual logged expenses.
+- **Completed Functionality:**
+  - Pure integer minor-unit financial domain modules (`src/lib/domain/splits.ts` and `src/lib/domain/settlements.ts`): deterministic lexicographical penny-remainder distribution for `EQUAL` splits (`£100.00 / 3 -> [3334, 3333, 3333]`), exact minor-unit sum verification for `CUSTOM` splits, `BigInt` Hamilton/Largest Remainder allocation across `10000` basis points for `PERCENTAGE` splits, single-currency trip ledger assertion, and greedy creditor-debtor minimal transfer generation (`computeMinimalSettlements`).
+  - Shared Zod expense/budget contracts (`src/lib/contracts/expense.schemas.ts`) and backend expense/settlement module (`server/modules/expenses/{expenses.service,settlements.service,expenses.routes}.ts`) enforcing `OWNER`/`EDITOR` budget caps, `OWNER`/`EDITOR`/`MEMBER` expense logging, payer-or-organiser delete permissions, and automatic `SUGGESTED` settlement regeneration inside Prisma transactions with live `onTripChanged` broadcasts.
+  - Interactive Budgets & Splits workspace (`src/components/expenses/{TripBudgetDashboard,BudgetAnalyticsCharts,AddExpenseCard,ExpenseSplitInputs,ExpensesAndSettlementsList}.tsx`, `src/components/workspace/{WorkspaceHeaderActions,WorkspaceBudgetQuickCard}.tsx`, `src/lib/useExpenses.ts`).
+  - Added dependency with justification: `recharts` (declarative, responsive SVG React charting library for category spend breakdowns and daily planned-vs-actual group spend comparisons).
+- **Tests Executed & Actual Results:**
+  - `npm run lint` — **PASS**
+  - `npm run typecheck` — **PASS**
+  - `npm run test` — **PASS** (`15` test files, `46` tests including `tests/unit/money-splits.test.ts` and `tests/api/expenses.test.ts`)
+  - `npm run build` — **PASS**
+  - `npm run test:e2e` — **PASS** (`9` Playwright Chrome specs including two-browser-context `tests/e2e/expenses.spec.ts`)
+- **Screenshots & Browser Evidence:**
+  - Captured desktop `1440×960` (`m8-budgets-expenses.png`) and verified `mobileOverflow390: false` and `pageErrors: []` in Chrome.
+- **Next Milestone:** **Milestone 9 — Public Landing Polish, User Settings, Privacy Deletion & Exports**

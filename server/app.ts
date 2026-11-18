@@ -12,6 +12,7 @@ import { createTravelAiProvider } from './modules/ai/ai.factory.js';
 import { createWorkspaceAiRouter } from './modules/ai/ai.routes.js';
 import type { TravelAIProvider } from './modules/ai/ai.types.js';
 import { createAuthRouter } from './modules/auth/auth.routes.js';
+import { createExpensesRouter } from './modules/expenses/expenses.routes.js';
 import { createHealthRouter } from './modules/health/health.routes.js';
 import { createInvitationsRouter } from './modules/invitations/invitations.routes.js';
 import { createMapsRouter } from './modules/maps/maps.routes.js';
@@ -60,6 +61,7 @@ export function createApp(
   app.use('/api', createMembersRouter(deps?.prisma));
   app.use('/api', createActivitiesRouter(deps?.prisma, deps?.onTripChanged));
   app.use('/api', createVotesRouter(deps?.prisma, deps?.onTripChanged));
+  app.use('/api', createExpensesRouter(deps?.prisma, deps?.onTripChanged));
   app.use('/api', createMapsRouter(config, deps?.prisma));
   app.use(
     '/api',
