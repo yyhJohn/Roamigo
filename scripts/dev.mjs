@@ -4,7 +4,7 @@ import process from 'node:process';
 const viteArgs = process.argv.slice(2);
 const serverPort = process.env.PORT || '3001';
 
-const serverProc = spawn('npx', ['tsx', 'server/index.ts'], {
+const serverProc = spawn('npx', ['tsx', 'watch', 'server/index.ts'], {
   stdio: 'inherit',
   env: { ...process.env, PORT: serverPort },
 });

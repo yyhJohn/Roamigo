@@ -56,3 +56,24 @@
 - **Screenshots & Browser Evidence:**
   - Verified desktop Light (`m1-home-desktop.png`), desktop Dark (`m1-shell-desktop-dark.png`), and mobile `390×844` (`m1-shell-mobile-390.png`, horizontal overflow `false`) in Google Chrome.
 - **Next Milestone:** **Milestone 2 — Database and Backend Foundation**
+
+
+---
+
+## Milestone 2 — Database and Backend Foundation
+
+- **Objective:** Provision PostgreSQL 16 (`roamigo` & `roamigo_test`), define the 18-entity relational Prisma schema with initial migration and repeatable demo seed, and introduce the layered Express security, error-handling, structured logging, health, and OpenAPI 3.1 foundation.
+- **Completed Functionality:**
+  - Created `prisma/schema.prisma` with all 18 entities (`User`, `Session`, `Trip`, `TripMember`, `TripInvitation`, `TravellerPreference`, `Itinerary`, `ItineraryVersion`, `ItineraryDay`, `Activity`, `Vote`, `Budget`, `Expense`, `ExpenseSplit`, `Settlement`, `AIRequest`, `Notification`, `AuditLog`), integer minor-unit financial fields, `UNIQUE(tripId, userId)`, `UNIQUE(activityId, userId)`, `UNIQUE(expenseId, userId)`, and cascade/nullability rules.
+  - Generated and applied initial migration `20261118195042_init` on both `roamigo` and `roamigo_test`.
+  - Implemented `prisma/seedData.ts` & `prisma/seed.ts` (`npm run db:seed`) seeding demo accounts (`alice@roamigo.demo`, `james@roamigo.demo`, `sophie@roamigo.demo`) and the flagship **Barcelona Long Weekend (Demo Trip)** with curated coordinates, votes, minor-unit expenses, splits, and settlements.
+  - Implemented `server/lib/{crypto,errors,logger,http}.ts`, `server/db/prisma.ts`, `server/middleware/security.ts` (`helmet`, CORS, `cookie-parser`, rate limiters), `server/modules/health/health.routes.ts`, and `server/modules/openapi/{openapi.spec,openapi.routes}.ts` (`GET /api/openapi.json`).
+  - Added new dependencies with justification: `@prisma/client` & `prisma` (type-safe PostgreSQL ORM and migrations), `helmet` (HTTP security headers), `cookie-parser` & `@types/cookie-parser` (`HttpOnly` cookie session parsing), `express-rate-limit` (brute-force and AI endpoint throttling).
+- **Tests Executed & Actual Results:**
+  - `npm run db:seed` — **PASS**
+  - `npm run lint` — **PASS**
+  - `npm run typecheck` — **PASS**
+  - `npm run test` — **PASS** (`7` test files, `30` tests including live PostgreSQL `tests/api/health-db.test.ts`)
+  - `npm run build` — **PASS**
+  - `npm run test:e2e` — **PASS** (`4` Chrome Playwright specs)
+- **Next Milestone:** **Milestone 3 — Authentication and Authorisation**
