@@ -12,6 +12,13 @@ Roamigo is a group travel planning web application that helps friends resolve co
 - **Immediate Activity Voting:** Switch between travellers in the same browser session to upvote or downvote activities with duplicate-vote prevention and immediate score updates.
 - **Deterministic Budget Calculations:** Estimated per-person totals and individual over-budget warnings are computed deterministically in TypeScript (`src/lib/budget.ts`) whenever activities are included/excluded or budgets change. All displayed prices are estimates (`est.`), not live booking quotes.
 
+## Technology Stack
+
+- **Frontend:** React 18, TypeScript (strict mode), Vite, Tailwind CSS v4
+- **Backend:** Node.js, Express, `@google/genai` (Gemini Developer API or Vertex AI ADC)
+- **Validation & Persistence:** Zod schemas (`src/lib/schemas.ts`) and browser `localStorage` (`roamigo:v1:trip`)
+- **Testing & Quality:** ESLint (with `max-lines` 200-line enforcement), TypeScript compiler checks, Vitest, Supertest, and Playwright (Chrome)
+
 ## Prerequisites
 
 - Node.js `v22+` and `npm`
@@ -55,3 +62,9 @@ Then open `http://localhost:8080` in your browser.
 - `src/lib/` — Zod schemas, deterministic budget/voting logic, `localStorage` persistence, and API client
 - `server/routes/` & `server/services/` — Express API routes and Gemini structured-output client
 - `tests/` — Unit, API integration, and Playwright browser acceptance tests
+
+## Known Limitations
+
+- **Server-Side AI Credentials Required:** Live itinerary generation (`POST /api/itinerary/generate`) requires either a valid `GEMINI_API_KEY` or a Google Cloud service account/ADC with `aiplatform.endpoints.predict` (`roles/aiplatform.user`) and `GEMINI_MODEL` configured in `.env`. Without credentials, `/api/health` reports `aiConfigured: false` and live generation returns `503`.
+- **Single-Browser Persistence:** Trip state, votes, and included/excluded activity selections are stored locally in the browser (`localStorage`). There is no backend database, user authentication, or real-time multi-device sync.
+- **Estimated Pricing Only:** Activity costs and per-traveller budget warnings are deterministic estimates (`est.`) derived from the generated plan, not live booking quotes or external pricing APIs.
