@@ -219,3 +219,20 @@
 - **Screenshots & Browser Evidence:**
   - Captured Dark Mode Settings (`m9-settings-dark.png`) and Print/PDF Itinerary View (`m9-print-view.png`), and verified zero horizontal overflow across `375px`, `390px`, `768px`, `1280px`, and `1440px` (`pageErrors: []`, `consoleErrors: []`).
 - **Next Milestone:** **Milestone 10 — Independent Security Audit, Skill Update, Docker Stack & GitHub Actions CI**
+
+
+---
+
+## Milestone 10 — Independent Security Audit, Skill Update, Docker Stack & GitHub Actions CI
+
+- **Objective:** Perform an independent OWASP & codebase rule security audit, remediate any discovered edge cases, upgrade `.agents/skills/verify-roamigo/SKILL.md` for full-stack production verification, and author verified Docker, Docker Compose, Nginx TLS reverse-proxy, and GitHub Actions CI configurations.
+- **Completed Functionality:**
+  - Independent Security Audit (`docs/SECURITY_AUDIT.md`): verified zero `any`, `@ts-ignore`, `@ts-expect-error`, `dangerouslySetInnerHTML`, or raw SQL across `src/` and `server/`; remediated open-redirect edge case on `?next=` query params via `sanitizeInternalRedirect()` (`src/pages/AuthPage.tsx`, `tests/unit/security.test.ts`); added `app.set('trust proxy', 1)` in production (`server/middleware/security.ts`); documented `npm audit` major-version advisory dispositions.
+  - Updated agent verification skill (`.agents/skills/verify-roamigo/SKILL.md`) covering PostgreSQL readiness, Auth/RBAC, 3-panel MapLibre workspace, multi-context Socket.IO voting, integer minor-unit splits, exports, and AC1–AC5 preservation.
+  - Production container & deployment stack (`Dockerfile`, `.dockerignore`, `docker/entrypoint.sh`, `docker-compose.yml`, `deploy/nginx/roamigo.conf`, `.github/workflows/ci.yml`, `.env.example`, `README.md`).
+- **Tests Executed & Actual Results:**
+  - `npm run lint` — **PASS**
+  - `npm run typecheck` — **PASS**
+  - `npm run test` — **PASS** (`18` test files, `50` tests including `tests/unit/security.test.ts`)
+  - `docker build -t roamigo:rc1 .` — **PASS** (`node:22-bookworm-slim` multi-stage build, non-root `node` runtime, `/api/health/ready` `HEALTHCHECK`)
+- **Next Milestone:** **Milestone 11 — Final Release Verification, Tagging (`v1.0.0-rc.1`) & Engineering Report**

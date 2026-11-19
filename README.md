@@ -1,70 +1,97 @@
 # Roamigo
 
-**Plan Together, Travel Better.**
+**Less Arguing, More Wandering.**
 
-Roamigo is a group travel planning web application that helps friends resolve conflicting budgets, interests, and preferences without endless group chats.
+Roamigo is a production-ready, AI-powered collaborative travel planning platform built for groups of friends, students, couples, and budget-conscious travellers. It combines a no-signup **Instant Group Consensus Sandbox** with persistent **multi-member workspaces**, **Before/After staged AI itinerary diffs**, **interactive MapLibre GL JS destination maps**, **real-time Socket.IO voting**, **penny-exact integer minor-unit expense splitting**, and **portable exports (`.ics`, `.csv`, `.json`, printable PDF)**.
 
-## Features
+---
 
-- **Trip & Traveller Setup:** Configure candidate destinations, travel dates, group size, and currency (`GBP`, `USD`, `EUR`), then add or remove travellers with individual budgets, interests, and notes on a single page.
-- **Inline Validation & Browser Persistence:** All trip and traveller inputs are validated with Zod, displaying inline field errors without clearing user inputs and persisting trip state in `localStorage` (`roamigo:v1:trip`) with explicit recovery warnings if storage fails.
-- **Structured AI Itinerary Generation:** The Express backend (`POST /api/itinerary/generate`) invokes Gemini with a structured JSON schema and validates the response with Zod before rendering a day-by-day itinerary with compromise explanations.
-- **Immediate Activity Voting:** Switch between travellers in the same browser session to upvote or downvote activities with duplicate-vote prevention and immediate score updates.
-- **Deterministic Budget Calculations:** Estimated per-person totals and individual over-budget warnings are computed deterministically in TypeScript (`src/lib/budget.ts`) whenever activities are included/excluded or budgets change. All displayed prices are estimates (`est.`), not live booking quotes.
+## Core Capabilities
 
-## Technology Stack
+- **Persistent Accounts, CSRF & Role-Based Access Control:** `scrypt` password hashing, `HttpOnly; SameSite=Lax` cookie sessions, timing-safe `X-CSRF-Token` validation, zero secrets in `localStorage`, and server-enforced `OWNER` / `EDITOR` / `MEMBER` / `VIEWER` permissions.
+- **10-Step Create Trip Wizard & MVP Importer:** Draft-saving wizard (`POST /api/trips`), read-only seeded **Barcelona Long Weekend Demo Trip** with 1-click cloning, secure collaborator invite links (`/invites/:token`), and seamless import of legacy `'roamigo:v1:trip'` `localStorage` plans (`POST /api/trips/import-local`).
+- **Multi-Provider AI Engine & Staged Diffs:** Pluggable server-side provider abstraction (`gemini-api`, `vertex-ai`, `openai`, `openai-compatible`), strict Zod output validation, PII-redacted prompts, `AIRequest` audit logging, and staged Before/After assistant previews that never overwrite saved plans or votes without explicit confirmation.
+- **Flagship 3-Panel Trip Workspace & MapLibre Map:** Editable day-by-day timeline, drag/button reordering, and interactive MapLibre GL JS pins backed by curated & optional Nominatim geocoding (`coordSource: 'curated' | 'nominatim' | 'manual' | 'unverified'`—never fabricating coordinates).
+- **Real-Time Collaborative Voting:** Server-authoritative `UNIQUE(activityId, userId)` voting, deterministic consensus badges (`LOCKED_IN`, `UNANIMOUS`, `MAJORITY_DISAGREEMENT`, `CONTESTED`), and live Socket.IO room presence (`trip:<tripId>`).
+- **Integer Minor-Unit Budgets, Splits & Settlements:** All monetary amounts are stored and calculated in integer minor units (`pence`/`cents`) supporting `EQUAL`, `CUSTOM`, and `BigInt` Hamilton `PERCENTAGE` (`10000` bp) splits, minimum-transfer debt simplification, and Recharts analytics while keeping `est.` itinerary costs separate from actual expenses.
+- **Settings, Privacy Deletion & Exports:** Light/Dark themes (`#103D3B` Forest Teal & `#A7F3CF` Fresh Mint), collaborator email-visibility controls, permanent/anonymizing account deletion (`DELETE /api/users/me`), RFC 5545 `.ics` calendar export, formula-injection-safe `.csv` ledger export, `.json` backup, and `@media print` PDF view.
 
-- **Frontend:** React 18, TypeScript (strict mode), Vite, Tailwind CSS v4
-- **Backend:** Node.js, Express, `@google/genai` (Gemini Developer API or Vertex AI ADC)
-- **Validation & Persistence:** Zod schemas (`src/lib/schemas.ts`) and browser `localStorage` (`roamigo:v1:trip`)
-- **Testing & Quality:** ESLint (with `max-lines` 200-line enforcement), TypeScript compiler checks, Vitest, Supertest, and Playwright (Chrome)
+---
 
-## Prerequisites
+## Architecture & Tech Stack
 
+- **Frontend:** React 18, TypeScript (`strict`), Vite 6, Tailwind CSS v4, React Router, TanStack Query, Zustand, Radix UI primitives, Lucide React, Recharts, MapLibre GL JS
+- **Backend:** Node.js 22, Express layered modular monolith (`server/modules/*`), Socket.IO, Helmet CSP, `express-rate-limit`
+- **Database:** PostgreSQL 16 + Prisma ORM (`prisma/schema.prisma`, 18 entities)
+- **Verification:** ESLint (`max-lines <= 200`), TypeScript `tsc`, Vitest + Supertest, Playwright (Google Chrome)
+
+Detailed engineering documentation lives in [`docs/`](./docs):
+- [`docs/PROJECT_AUDIT.md`](./docs/PROJECT_AUDIT.md) — Baseline MVP audit
+- [`docs/PRODUCT_SPEC.md`](./docs/PRODUCT_SPEC.md) — Product requirements & user journeys
+- [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) — System architecture & data model
+- [`docs/UI_DESIGN.md`](./docs/UI_DESIGN.md) — Approved hybrid design system & tokens
+- [`docs/SECURITY_AUDIT.md`](./docs/SECURITY_AUDIT.md) — OWASP & dependency security audit
+- [`docs/PROGRESS.md`](./docs/PROGRESS.md) — Milestone-by-milestone verification log
+
+---
+
+## Quick Start (Local Development)
+
+### Prerequisites
 - Node.js `v22+` and `npm`
+- PostgreSQL `16+` (local service or Docker)
 
-## Environment Configuration (Server-Side Only)
-
-Copy `.env.example` to `.env` and configure your server-side Gemini credentials before generating live AI itineraries:
-
+### 1. Configure Environment
 ```bash
 cp .env.example .env
 ```
+Configure `DATABASE_URL` and `SESSION_SECRET` (`openssl rand -hex 32`). Optionally set `GEMINI_API_KEY` + `GEMINI_MODEL` (or `OPENAI_API_KEY` / `GCP_PROJECT_ID`) to enable live AI generation. Never commit `.env`.
 
-Set one of:
-- **Option A (Gemini Developer API):** `GEMINI_API_KEY` and `GEMINI_MODEL`
-- **Option B (Vertex AI ADC):** `GCP_PROJECT_ID`, `GCP_LOCATION`, and `GEMINI_MODEL` (requires `aiplatform.endpoints.predict` / `roles/aiplatform.user` permission)
-
-Never commit `.env` or expose API credentials to the browser.
-
-## Run From a Clean Checkout
-
-Run a single command from the repository root to install dependencies and launch both the Vite frontend (`:8080`) and Express API server (`:3001`):
-
+### 2. Migrate & Seed PostgreSQL
 ```bash
-npm install && npm run dev -- --host 0.0.0.0 --port 8080
+npm install
+npx prisma migrate deploy
+npm run db:seed
 ```
+Demo account seeded automatically:
+- **Email:** `alice@roamigo.demo`
+- **Password:** `RoamigoDemo2026!`
 
-Then open `http://localhost:8080` in your browser.
+### 3. Launch Full-Stack Dev Server
+```bash
+npm run dev -- --host 0.0.0.0 --port 8080
+```
+Open `http://localhost:8080` (Vite SPA on `:8080` proxying `/api` and `/socket.io` to Express on `:3001`).
+
+---
+
+## Production Deployment
+
+### Option A: Single-Command Docker Compose Stack
+```bash
+cp .env.example .env
+# Edit SESSION_SECRET, POSTGRES_PASSWORD, APP_ORIGIN, and optional AI keys in .env
+docker compose up --build -d
+```
+`roamigo-app` waits for healthy `postgres:16-alpine`, runs `prisma migrate deploy`, seeds idempotent demo data (`SEED_DEMO_DATA=true`), and serves both the SPA and API/WebSockets on `http://localhost:8080` with `/api/health/ready` healthchecks.
+
+### Option B: Ubuntu VPS + Nginx + Let's Encrypt HTTPS
+1. Provision an Ubuntu 22.04/24.04 LTS host with Docker Engine, Docker Compose plugin, Nginx, and Certbot (`apt install nginx certbot python3-certbot-nginx`).
+2. Clone the repository to `/opt/roamigo`, create `/opt/roamigo/.env` with `NODE_ENV=production`, `APP_ORIGIN=https://roamigo.example.com`, a 32-byte `SESSION_SECRET`, strong `POSTGRES_PASSWORD`, and server-side AI credentials.
+3. Start the container stack bound to localhost (`127.0.0.1:8080:3001`):
+   ```bash
+   docker compose up --build -d
+   ```
+4. Copy [`deploy/nginx/roamigo.conf`](./deploy/nginx/roamigo.conf) to `/etc/nginx/sites-available/roamigo.conf`, replace `roamigo.example.com` with your domain, obtain Let's Encrypt certificates (`certbot --nginx -d roamigo.example.com`), and reload Nginx (`nginx -t && systemctl reload nginx`).
+
+---
 
 ## Verification & Quality Scripts
 
-- `npm run lint` — ESLint checks (including the 200-line `max-lines` limit on `src/` and `server/`)
-- `npm run typecheck` — Strict TypeScript checks for frontend and server
-- `npm run test` — Vitest unit and API integration tests (`tests/unit/`, `tests/api/`)
-- `npm run build` — Production Vite + TypeScript server build (`dist/`, `dist-server/`)
-- `npm run test:e2e` — Playwright acceptance tests in Chrome (`tests/e2e/acceptance.spec.ts`)
-- `npm run start` — Serve the production build via Express (`NODE_ENV=production`)
-
-## Project Structure
-
-- `src/components/` — React UI components (`TripSetupForm`, `TravellerForm`, `TravellerList`, `BudgetSummaryBar`, `ItineraryPanel`, `ActivityCard`, `FormField`)
-- `src/lib/` — Zod schemas, deterministic budget/voting logic, `localStorage` persistence, and API client
-- `server/routes/` & `server/services/` — Express API routes and Gemini structured-output client
-- `tests/` — Unit, API integration, and Playwright browser acceptance tests
-
-## Known Limitations
-
-- **Server-Side AI Credentials Required:** Live itinerary generation (`POST /api/itinerary/generate`) requires either a valid `GEMINI_API_KEY` or a Google Cloud service account/ADC with `aiplatform.endpoints.predict` (`roles/aiplatform.user`) and `GEMINI_MODEL` configured in `.env`. Without credentials, `/api/health` reports `aiConfigured: false` and live generation returns `503`.
-- **Single-Browser Persistence:** Trip state, votes, and included/excluded activity selections are stored locally in the browser (`localStorage`). There is no backend database, user authentication, or real-time multi-device sync.
-- **Estimated Pricing Only:** Activity costs and per-traveller budget warnings are deterministic estimates (`est.`) derived from the generated plan, not live booking quotes or external pricing APIs.
+```bash
+npm run lint        # ESLint strict rules + 200-line max-lines check
+npm run typecheck   # Strict TypeScript check (frontend + server)
+npm run test        # Vitest unit + PostgreSQL API integration tests
+npm run build       # Production Vite SPA + compiled Express server
+npm run test:e2e    # Multi-context Playwright Chrome acceptance suite
+```

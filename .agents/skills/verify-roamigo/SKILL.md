@@ -3,33 +3,48 @@ name: verify-roamigo
 description: Repeatable acceptance verification workflow for Roamigo. Activate when verifying itinerary generation, traveller preferences, voting, budget calculations, AC1-AC5 browser behavior, or release readiness.
 ---
 
-# Verify Roamigo (Acceptance & Release Workflow)
+# Verify Roamigo (Full-Stack Production & Historical AC1–AC5 Workflow)
 
-Run this workflow to verify Roamigo against AC1–AC5 using evidence-based browser and API checks.
+Run this workflow to verify Roamigo's full-stack collaborative travel platform and historical AC1–AC5 guarantees using evidence-based CLI, API, database, and Chrome checks.
 
-## 1. Prerequisites
+## 1. Automated Quality Gates
 
-Ensure the static, unit, API, and build gates defined in `AGENTS.md` (Definition of Done) pass before browser testing.
+Execute all required static, unit, integration, and build checks from the repository root:
 
-## 2. Live Server & Credential Readiness
+```bash
+npm run lint
+npm run typecheck
+npm run test
+npm run build
+npm run test:e2e
+```
 
-1. Start the app: `npm run dev -- --host 0.0.0.0 --port 8080`.
-2. Probe `GET http://127.0.0.1:8080/api/health` to confirm Express + Vite proxy connectivity (`aiConfigured`, `provider`).
-3. If `aiConfigured` is `false` or live Gemini/Vertex credentials fail (`403` / `503`), mark live AC3 generation as `BLOCKED` and report route-fixture UI checks separately.
+All five gates must exit `0` (`max-lines <= 200` on `src/` and `server/`, zero `any` or `@ts-ignore`, strict Zod validation, and integer minor-unit financial math).
 
-## 3. Browser-Observable Acceptance Verification (AC1–AC5)
+## 2. Live Server, PostgreSQL & AI Readiness
 
-Open `http://127.0.0.1:8080` in headless Chrome (Playwright or DevTools) and verify directly in the DOM:
+1. Ensure PostgreSQL 16 is running and seeded (`npm run db:deploy && npm run db:seed`).
+2. Start the full-stack dev server: `npm run dev -- --host 0.0.0.0 --port 8080`.
+3. Probe `GET http://127.0.0.1:8080/api/health` and `GET http://127.0.0.1:8080/api/health/ready`:
+   - Confirm `ok: true` and `database: "connected"`.
+   - Inspect `aiConfigured` and `provider` (`gemini-api`, `vertex-ai`, `openai`, `openai-compatible`, or `unconfigured`). If `aiConfigured: false`, report live upstream AI calls as `BLOCKED` (unconfigured credentials) while verifying deterministic provider/UI flows via test fixtures.
 
-- **AC1 (Traveller Management):** Add at least two travellers with distinct budgets, interests, and preferences; verify all render on the same page; remove one and verify immediate removal.
-- **AC2 (Inline Validation Preserving Inputs):** Submit missing fields or a negative budget; verify inline errors render while existing input values stay populated.
-- **AC3 (AI Itinerary Generation):** Click `"Generate Itinerary"`; verify loading state transitions to a day-by-day itinerary with activities, `"est."` costs in a consistent currency, and group compromise explanations.
-- **AC4 (Immediate Per-Traveller Voting):** Switch `"Voting as"` between travellers, upvote/downvote an activity, and verify vote counts update immediately without refresh; verify switching/re-clicking does not double-count.
-- **AC5 (Immediate Cost & Budget Conflict Updates):** Toggle an activity between included and excluded; verify `"Estimated Cost / Person"` updates immediately and exceeded individual budgets highlight (and clear when excluded).
+## 3. Browser-Observable Acceptance Checks
+
+1. **Historical Instant Sandbox (`/`, AC1–AC5):**
+   - Add/remove travellers with inline validation preserving inputs, generate day-by-day plans with `est.` costs, cast duplicate-safe per-traveller votes, and toggle activities to verify deterministic budget warnings.
+2. **Authentication, CSRF & Zero-Secret Storage (`/auth/login`, `/auth/register`):**
+   - Sign in or register; verify `roamigo_session` is `HttpOnly` and `window.localStorage` contains zero session tokens or API keys.
+3. **3-Panel Trip Workspace, MapLibre & Real-Time Voting (`/trips/:tripId`):**
+   - Clone the Barcelona Demo Trip, verify MapLibre pins (`curated` vs `unverified` coordinates), cast votes across two browser contexts, and confirm live `Socket.IO` updates without reload.
+4. **Integer Minor-Unit Budgets, Splits & Settlements (`Budgets & Splits` tab):**
+   - Log shared expenses (`EQUAL`, `CUSTOM`, `PERCENTAGE`), confirm penny-exact remainder allocation and minimum-transfer settlements, and verify `est.` itinerary totals stay separate from actual logged expenses.
+5. **Settings, Privacy & Exports (`/settings`, `/trips/:tripId/print`):**
+   - Verify Light/Dark theme switching, `.ics` / formula-safe `.csv` / `.json` downloads, printable PDF view, and responsive layouts (`375px`–`1440px`) with zero console/page errors.
 
 ## 4. Reporting Format
 
-Report results with observed evidence only:
-- `/api/health` status + `AGENTS.md` check summary (`PASS` / `FAIL`).
-- AC1–AC5 browser status (`PASS` / `FAIL` / `BLOCKED`) with DOM/console evidence.
-- Explicit blockers (unprovisioned credentials, missing UI, or failing checks).
+Report observed evidence only (never fabricate outputs, coordinates, or commit hashes):
+- Gate summary (`lint`, `typecheck`, `test`, `build`, `test:e2e`, `docker build`).
+- `/api/health` + `/api/health/ready` payload summary.
+- Browser & multi-context collaboration results with explicit note of any unprovisioned external credentials.

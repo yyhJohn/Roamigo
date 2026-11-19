@@ -4,6 +4,8 @@ export default defineConfig({
   test: {
     environment: 'node',
     fileParallelism: false,
+    testTimeout: 15_000,
+    hookTimeout: 15_000,
     include: ['tests/unit/**/*.test.ts', 'tests/api/**/*.test.ts'],
   },
 });

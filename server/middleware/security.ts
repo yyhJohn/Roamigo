@@ -9,6 +9,9 @@ export function applySecurityMiddleware(
   config: ServerConfig,
 ): void {
   app.disable('x-powered-by');
+  if (config.nodeEnv === 'production') {
+    app.set('trust proxy', 1);
+  }
   app.use(
     helmet({
       contentSecurityPolicy: {

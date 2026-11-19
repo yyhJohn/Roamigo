@@ -11,9 +11,22 @@ import { RoamigoLogo } from '../components/ui/RoamigoLogo';
 
 export type AuthViewMode = 'login' | 'register' | 'forgot' | 'reset';
 
+export function sanitizeInternalRedirect(raw: string | null): string {
+  if (
+    !raw ||
+    !raw.startsWith('/') ||
+    raw.startsWith('//') ||
+    raw.includes('\\') ||
+    raw.includes('://')
+  ) {
+    return '/trips';
+  }
+  return raw;
+}
+
 export function AuthPage({ mode }: { mode: AuthViewMode }) {
   const [searchParams] = useSearchParams();
-  const nextPath = searchParams.get('next') || '/trips';
+  const nextPath = sanitizeInternalRedirect(searchParams.get('next'));
 
   return (
     <div className="grid min-h-screen bg-[var(--bg-canvas)] text-[var(--text-primary)] lg:grid-cols-12">

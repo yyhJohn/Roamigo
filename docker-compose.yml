@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: roamigo-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-roamigo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-roamigo}
+      POSTGRES_DB: ${POSTGRES_DB:-roamigo}
+    volumes:
+      - roamigo_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-roamigo} -d ${POSTGRES_DB:-roamigo}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: roamigo-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${APP_PORT:-8080}:3001"
+    environment:
+      NODE_ENV: production
+      PORT: "3001"
+      APP_ORIGIN: ${APP_ORIGIN:-http://localhost:8080}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-roamigo}:${POSTGRES_PASSWORD:-roamigo}@postgres:5432/${POSTGRES_DB:-roamigo}?schema=public
+      SESSION_SECRET: ${SESSION_SECRET:-change-this-32-byte-secret-in-production}
+      SEED_DEMO_DATA: ${SEED_DEMO_DATA:-true}
+      AI_PROVIDER: ${AI_PROVIDER:-}
+      AI_MODEL: ${AI_MODEL:-}
+      AI_API_KEY: ${AI_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+
+volumes:
+  roamigo_pgdata:
