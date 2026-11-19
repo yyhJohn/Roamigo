@@ -236,3 +236,23 @@
   - `npm run test` — **PASS** (`18` test files, `50` tests including `tests/unit/security.test.ts`)
   - `docker build -t roamigo:rc1 .` — **PASS** (`node:22-bookworm-slim` multi-stage build, non-root `node` runtime, `/api/health/ready` `HEALTHCHECK`)
 - **Next Milestone:** **Milestone 11 — Final Release Verification, Tagging (`v1.0.0-rc.1`) & Engineering Report**
+
+
+---
+
+## Milestone 11 — Final Release Verification, Tagging (`v1.0.0-rc.1`) & Handover
+
+- **Objective:** Execute the complete end-to-end release verification suite (`db:seed`, `lint`, `typecheck`, `test`, `build`, `test:e2e`, live health probes), publish `docs/RELEASE_NOTES.md`, tag `v1.0.0-rc.1`, and push `main` + tags to `origin`.
+- **Completed Functionality:**
+  - Authored `docs/RELEASE_NOTES.md` and bumped `package.json` version to `1.0.0-rc.1`.
+  - Executed full-stack release verification across all 18 Vitest unit/API suites (`50` tests) and all 10 Playwright Chrome E2E specs (covering original AC1–AC5, Auth/CSRF/RBAC, 10-Step Wizard, MapLibre 3-Panel Workspace, Multi-Context Real-Time Voting, Minor-Unit Splits/Settlements, and Exports/Settings/Account Deletion).
+  - Tagged `v1.0.0-rc.1` alongside preserved baseline `v0.1.0-hackathon` (`b506a9a`) and pushed to `origin/main`.
+- **Tests Executed & Actual Results:**
+  - `npm run db:seed` — **PASS**
+  - `npm run lint` — **PASS** (`0` errors, `max-lines <= 200` enforced)
+  - `npm run typecheck` — **PASS** (`0` errors, `strict: true`)
+  - `npm run test` — **PASS** (`18` test files, `50` tests)
+  - `npm run build` — **PASS** (`dist/` + `dist-server/`)
+  - `npm run test:e2e` — **PASS** (`10` Playwright Chrome specs)
+  - `GET /api/health` & `GET /api/health/ready` — **PASS** (`HTTP 200`, `database: "connected"`)
+- **Status:** **COMPLETE (`v1.0.0-rc.1`)**
